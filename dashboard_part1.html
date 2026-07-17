@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FTC — For The Children | Project Dashboard</title>
+<style>
+:root {
+  --bg: #0a0e1a;
+  --surface: #131829;
+  --surface2: #1a2238;
+  --border: #2a3454;
+  --accent: #4f9eff;
+  --accent2: #00d4aa;
+  --text: #e4e8f0;
+  --text2: #8896b3;
+  --warn: #ffb347;
+  --danger: #ff6b6b;
+  --success: #00d4aa;
+  --mono: "SF Mono", "Fira Code", "Cascadia Code", Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+.app { display: flex; min-height: 100vh; }
+
+/* ─── Sidebar ─── */
+.sidebar {
+  width: 260px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 0;
+  flex-shrink: 0;
+  position: fixed;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 100;
+}
+.sidebar-header {
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.sidebar-header .subtitle {
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.nav-section {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.nav-section-title {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text2);
+  padding: 8px 20px;
+  font-weight: 600;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  font-size: 14px;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.15s;
+  border-left: 3px solid transparent;
+}
+.nav-item:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+.nav-item.active {
+  background: var(--surface2);
+  color: var(--accent);
+  border-left-color: var(--accent);
+}
+.nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+
+/* ─── Main ─── */
+.main {
+  margin-left: 260px;
+  flex: 1;
+  padding: 32px 40px;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+.main.hidden { display: none; }
+
+.view { display: none; }
+.view.active { display: block; }
+
+.view-header {
+  margin-bottom: 28px;
+}
+.view-header h2 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.view-header p {
+  color: var(--text2);
+  font-size: 14px;
+}
+
+/* ─── Cards ─── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-title .badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.badge.ok { background: rgba(0,212,170,0.15); color: var(--success); }
+.badge.warn { background: rgba(255,179,71,0.15); color: var(--warn); }
+.badge.info { background: rgba(79,158,255,0.15); color: var(--accent); }
+
+/* ─── Stats Grid ─── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+.stat-card .stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--accent);
+  font-family: var(--mono);
+}
+.stat-card .stat-label {
+  font-size: 12px;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 6px;
+}
+.stat-card .stat-sub {
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 4px;
+}
+
+/* ─── Table ─── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th {
+  text-align: left;
+  padding: 10px 14px;
+  background: var(--surface2);
+  color: var(--text2);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+tr:hover td { background: var(--surface2); }
+td.mono { font-family: var(--mono); font-size: 12px; }
+td.num { text-align: right; font-family: var(--mono); }
+
+/* ─── Decision cards ─── */
+.decision-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 16px;
+  border-left: 4px solid var(--accent);
+}
+.decision-card .d-num {
+  font-size: 12px;
+  color: var(--text2);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.decision-card .d-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 4px 0 8px;
+}
+.decision-card .d-answer {
+  font-size: 15px;
+  color: var(--accent2);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.decision-card .d-rationale {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.7;
+}
+
+/* ─── Code blocks ─── */
+.code-block {
+  background: #0d1117;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  max-height: 600px;
+  overflow-y: auto;
+}
+.code-block .sol-keyword { color: #ff7b72; }
+.code-block .sol-string { color: #a5d6ff; }
+.code-block .sol-comment { color: #6e7681; font-style: italic; }
+.code-block .sol-number { color: #79c0ff; }
+.code-block .sol-func { color: #d2a8ff; }
+.code-block .sol-type { color: #ffa657; }
+
+/* ─── ABI viewer ─── */
+.abi-func {
+  background: var(--surface2);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.abi-func .fn-name { color: var(--accent2); font-weight: 600; }
+.abi-func .fn-type { color: var(--warn); font-size: 10px; padding: 1px 6px; border-radius: 3px; background: rgba(255,179,71,0.1); }
+.abi-func .fn-args { color: var(--text2); }
+.abi-event { border-left: 3px solid var(--accent); }
+.abi-error { border-left: 3px solid var(--danger); }
+
+/* ─── Scenario chart bars ─── */
+.bar-chart { margin: 16px 0; }
+.bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.bar-label { width: 100px; font-size: 13px; text-align: right; }
+.bar-track { flex: 1; height: 28px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 10px; font-size: 11px; font-family: var(--mono); color: #fff; transition: width 0.8s ease; }
+.bar-value { width: 100px; font-size: 12px; font-family: var(--mono); color: var(--text2); }
+
+/* ─── Tabs ─── */
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.tab {
+  padding: 10px 16px;
+  font-size: 13px;
+  color: var(--text2);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ─── Misc ─── */
+.muted { color: var(--text2); }
+.success { color: var(--success); }
+.warn { color: var(--warn); }
+.danger { color: var(--danger); }
+.pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.pill.green { background: rgba(0,212,170,0.15); color: var(--success); }
+.pill.blue { background: rgba(79,158,255,0.15); color: var(--accent); }
+.pill.orange { background: rgba(255,179,71,0.15); color: var(--warn); }
+.pill.red { background: rgba(255,107,107,0.15); color: var(--danger); }
+
+.doc-content { font-size: 14px; line-height: 1.8; color: var(--text); }
+.doc-content h1 { font-size: 24px; margin: 20px 0 12px; }
+.doc-content h2 { font-size: 18px; margin: 16px 0 8px; color: var(--accent); }
+.doc-content h3 { font-size: 15px; margin: 12px 0 6px; }
+.doc-content p { margin-bottom: 10px; }
+.doc-content ul, .doc-content ol { margin: 8px 0 12px 20px; }
+.doc-content li { margin-bottom: 4px; }
+.doc-content code { font-family: var(--mono); background: var(--surface2); padding: 2px 6px; border-radius: 3px; font-size: 12px; }
+.doc-content table { margin: 12px 0; }
+.doc-content strong { color: var(--accent2); }
+.doc-content hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+.doc-content blockquote { border-left: 3px solid var(--accent); padding-left: 16px; color: var(--text2); margin: 12px 0; }
+
+.scrollable { max-height: 500px; overflow-y: auto; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h1>For The Children</h1>
+      <div class="subtitle">FTC Project Dashboard</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">Overview</div>
+      <div class="nav-item active" data-view="overview"><span class="icon">📊</span> Overview</div>
+      <div class="nav-item" data-view="decisions"><span class="icon">✅</span> Decisions</div>
+      <div class="nav-item" data-view="tokenomics"><span class="icon">💰</span> Tokenomics</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">Smart Contracts</div>
+      <div class="nav-item" data-view="contracts"><span class="icon">📄</span> Contracts</div>
+      <div class="nav-item" data-view="ftc-sol"><span class="icon">🔷</span> FTC.sol</div>
+      <div class="nav-item" data-view="guardian-sol"><span class="icon">👤</span> GuardianRegistry.sol</div>
+      <div class="nav-item" data-view="vault-sol"><span class="icon">🏦</span> ChildSavingsVault.sol</div>
+      <div class="nav-item" data-view="abi"><span class="icon">🔧</span> ABI Reference</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">Docs</div>
+      <div class="nav-item" data-view="doc-architecture"><span class="icon">🏗</span> Architecture</div>
+      <div class="nav-item" data-view="doc-charter"><span class="icon">📋</span> Project Charter</div>
+      <div class="nav-item" data-view="doc-executive"><span class="icon">📈</span> Executive Summary</div>
+      <div class="nav-item" data-view="doc-risk"><span class="icon">⚠</span> Risk Register</div>
+      <div class="nav-item" data-view="doc-roadmap"><span class="icon">🗺</span> Testnet Roadmap</div>
+      <div class="nav-item" data-view="doc-legal"><span class="icon">⚖</span> Legal Considerations</div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- OVERVIEW -->
+    <div class="view active" id="view-overview">
+      <div class="view-header">
+        <h2>Project Overview</h2>
+        <p>FTC — For The Children. A blockchain-based child savings protocol on Base L2.</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">21B</div>
+          <div class="stat-label">Token Supply</div>
+          <div class="stat-sub">Fixed, no mint</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">3</div>
+          <div class="stat-label">Contracts Built</div>
+          <div class="stat-sub">All compile clean</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">17.7KB</div>
+          <div class="stat-label">Total Bytecode</div>
+          <div class="stat-sub">Under 24KB limit</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">$250</div>
+          <div class="stat-label">Base Deposit</div>
+          <div class="stat-sub">+ 1:1 match for low-income</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">Base</div>
+          <div class="stat-label">Target L2</div>
+          <div class="stat-sub">Coinbase</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">$140B</div>
+          <div class="stat-label">Base Case (30yr)</div>
+          <div class="stat-sub">Child wealth created</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 Project Summary</div>
+        <div class="doc-content">
+          <p>FTC is a blockchain-based child savings protocol that enables families to deposit FTC tokens into age-gated savings vaults for their children. The protocol features:</p>
+          <ul>
+            <li><strong>21 billion fixed supply</strong> — minted once at genesis, no future inflation</li>
+            <li><strong>Age-gated payouts</strong> — children can withdraw at ages 5, 10, 15, 20, and 25 (max 25% per checkpoint)</li>
+            <li><strong>Treasury-matched deposits</strong> — low-income families get 1:1 match up to $500 effective</li>
+            <li><strong>Partner-merchant stores</strong> — 10-30% discounts at participating retailers</li>
+            <li><strong>Deflationary burn</strong> — 25% of merchant fees burned permanently</li>
+            <li><strong>Floating yield</strong> — protocol parameter based on treasury returns, not a guarantee</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🏗 Contract Status</div>
+        <table>
+          <thead>
+            <tr><th>Contract</th><th>File</th><th>Bytecode</th><th>Functions</th><th>Events</th><th>Errors</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>FTC</strong></td>
+              <td class="mono">FTC.sol</td>
+              <td class="num">5,513 bytes</td>
+              <td class="num">24</td>
+              <td class="num">9</td>
+              <td class="num">11</td>
+              <td><span class="pill green">Compiled</span></td>
+            </tr>
+            <tr>
+              <td><strong>GuardianRegistry</strong></td>
+              <td class="mono">GuardianRegistry.sol</td>
+              <td class="num">5,063 bytes</td>
+              <td class="num">30</td>
+              <td class="num">10</td>
+              <td class="num">12</td>
+              <td><span class="pill green">Compiled</span></td>
+            </tr>
+            <tr>
+              <td><strong>ChildSavingsVault</strong></td>
+              <td class="mono">ChildSavingsVault.sol</td>
+              <td class="num">7,165 bytes</td>
+              <td class="num">40</td>
+              <td class="num">11</td>
+              <td class="num">13</td>
+              <td><span class="pill green">Compiled</span></td>
+            </tr>
+            <tr>
+              <td class="muted">Treasury</td>
+              <td class="mono muted">Treasury.sol</td>
+              <td class="num muted">—</td>
+              <td class="num muted">—</td>
+              <td class="num muted">—</td>
+              <td class="num muted">—</td>
+              <td><span class="pill orange">Phase 1+</span></td>
+            </tr>
+            <tr>
+              <td class="muted">FeeDispatcher</td>
+              <td class="mono muted">FeeDispatcher.sol</td>
+              <td class="num muted">—</td>
+              <td class="num muted">—</td>
+              <td class="num muted">—</td>
+              <td class="num muted">—</td>
+              <td><span class="pill orange">Phase 1+</span></td>
+            </tr>
+            <tr>
+              <td class="muted">StoreDiscount</td>
+              <td class="mono muted">StoreDiscount.sol</td>
+              <td class="num muted">—</td>
+              <td class="num muted">—</td>
+              <td class="num muted">—</td>
+              <td class="num muted">—</td>
+              <td><span class="pill orange">Phase 1+</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📊 30-Year Scenario Comparison</div>
+        <div class="bar-chart">
+          <div style="font-size:13px;margin-bottom:12px;color:var(--text2);">Child Balance Pool ($B) — Final value after 30 years</div>
+          <div class="bar-row">
+            <div class="bar-label">Adverse</div>
+            <div class="bar-track"><div class="bar-fill" style="width:1.3%;background:#ff6b6b;">$9.6B</div></div>
+            <div class="bar-value">$9.6B</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Conservative</div>
+            <div class="bar-track"><div class="bar-fill" style="width:5.8%;background:#ffb347;">$43.5B</div></div>
+            <div class="bar-value">$43.5B</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Base Case</div>
+            <div class="bar-track"><div class="bar-fill" style="width:18.5%;background:#4f9eff;">$139.5B</div></div>
+            <div class="bar-value">$139.5B</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Abundance</div>
+            <div class="bar-track"><div class="bar-fill" style="width:100%;background:#00d4aa;">$754.2B</div></div>
+            <div class="bar-value">$754.2B</div>
+          </div>
+        </div>
+        <div class="bar-chart" style="margin-top:24px;">
+          <div style="font-size:13px;margin-bottom:12px;color:var(--text2);">FTC Price — Final token price</div>
+          <div class="bar-row">
+            <div class="bar-label">Adverse</div>
+            <div class="bar-track"><div class="bar-fill" style="width:0.8%;background:#ff6b6b;">$1.07</div></div>
+            <div class="bar-value">$1.07</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Conservative</div>
+            <div class="bar-track"><div class="bar-fill" style="width:6%;background:#ffb347;">$7.85</div></div>
+            <div class="bar-value">$7.85</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Base Case</div>
+            <div class="bar-track"><div class="bar-fill" style="width:20%;background:#4f9eff;">$26.07</div></div>
+            <div class="bar-value">$26.07</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Abundance</div>
+            <div class="bar-track"><div class="bar-fill" style="width:100%;background:#00d4aa;">$130.16</div></div>
+            <div class="bar-value">$130.16</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DECISIONS -->
+    <div class="view" id="view-decisions">
+      <div class="view-header">
+        <h2>Design Decisions</h2>
+        <p>6 open questions — resolved 2026-07-17. Made with families and children as the primary lens.</p>
+      </div>
+
+      <div class="decision-card">
+        <div class="d-num">Decision 1</div>
+        <div class="d-title">L2 Choice</div>
+        <div class="d-answer">→ Base (Coinbase L2)</div>
+        <div class="d-rationale">This project onboards families, not traders. Base provides the easiest fiat onramp for non-crypto-native parents — deposit dollars via Coinbase, get FTC, no bridges or sidechains to understand. Low fees, growing ecosystem, and a consumer-facing team behind it. Families don't need to understand L2s; they just need it to work.</div>
+      </div>
+
+      <div class="decision-card">
+        <div class="d-num">Decision 2</div>
+        <div class="d-title">Legal Home</div>
+        <div class="d-answer">→ Delaware C-Corp + Wyoming DAO LLC + Swiss Foundation</div>
+        <div class="d-rationale">Delaware C-Corp for US fundraising and investor familiarity. Wyoming DAO LLC to give on-chain governance real legal personhood. Swiss foundation (Stiftung) to hold the treasury and mission — the Ethereum Foundation uses this structure. Protects the mission from profit pressure and enables global operations. <strong>Caveat:</strong> Requires securities counsel sign-off before commitment.</div>
+      </div>
+
+      <div class="decision-card">
+        <div class="d-num">Decision 3</div>
+        <div class="d-title">KYC Model</div>
+        <div class="d-answer">→ Lightweight attestation — guardian ID at creation, full KYC at $5,000+ withdrawals</div>
+        <div class="d-rationale">Full KYC on every child account would lock out the unbanked, undocumented, and rural families who lack clean identity documents. Guardian identity verified at account creation. Full KYC attestation only when cumulative withdrawals cross $5,000. The neediest families come first.</div>
+      </div>
+
+      <div class="decision-card">
+        <div class="d-num">Decision 4</div>
+        <div class="d-title">FTC Stores</div>
+        <div class="d-answer">→ Partner-merchant discount network first (no owned stores)</div>
+        <div class="d-rationale">Partner with merchants families already use — groceries, pharmacies, clothing, education, healthcare. Capital-light, fast to scale, reaches more families sooner. Owning stores is a massive operational distraction that delays the actual benefit to children.</div>
+      </div>
+
+      <div class="decision-card">
+        <div class="d-num">Decision 5</div>
+        <div class="d-title">Raise Size / Valuation</div>
+        <div class="d-answer">→ $8–15M public sale, target initial market cap $60–80M</div>
+        <div class="d-rationale">Conservative on purpose. The simulation's conservative case lands at ~$74M market cap — use that as the ceiling, not the floor. A modest raise avoids front-loading speculative pressure from large token holders who expect quick flips. The project's value comes from deposits, compounding, and adoption — not a token pump.</div>
+      </div>
+
+      <div class="decision-card">
+        <div class="d-num">Decision 6</div>
+        <div class="d-title">Deposit Norm</div>
+        <div class="d-answer">→ $250 base, with 1:1 treasury match for qualifying low-income families (up to $500 effective)</div>
+        <div class="d-rationale">$500 is a month's income in many parts of the world and in pockets of the US. That's too high for the most vulnerable families. The treasury can absorb the match because the compounding model creates long-term value, not the initial deposit size.</div>
+      </div>
+
+      <div class="card" style="border-left:4px solid var(--warn); margin-top:24px;">
+        <div class="card-title">⚠ Pending Counsel Sign-Off</div>
+        <div class="doc-content">
+          <p>Decisions <strong>#2</strong> (legal structure) and <strong>#3</strong> (KYC threshold) have real legal weight. They are directionally sound but must be confirmed by securities counsel before being written into final contracts or filed with any regulator.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOKENOMICS -->
+    <div class="view" id="view-tokenomics">
+      <div class="view-header">
+        <h2>Tokenomics</h2>
+        <p>21B fixed supply. 7-way genesis allocation. 30-year simulation results.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🪙 Genesis Allocation</div>
+        <table>
+          <thead>
+            <tr><th>Bucket</th><th>Allocation</th><th>Tokens</th><th>Vesting / Lock</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Community rewards & incentives</td><td class="num">25%</td><td class="num mono">5.25B</td><td>Released over 10–20 years via programs</td></tr>
+            <tr><td>Treasury</td><td class="num">20%</td><td class="num mono">4.20B</td><td>Protocol-owned; yield + store subsidies</td></tr>
+            <tr><td>Team + advisors</td><td class="num">15%</td><td class="num mono">3.15B</td><td>1-year cliff, 4-year linear vest</td></tr>
+            <tr><td>Investors</td><td class="num">10%</td><td class="num mono">2.10B</td><td>1-year cliff, 3-year linear vest</td></tr>
+            <tr><td>Public sale</td><td class="num">15%</td><td class="num mono">3.15B</td><td>Unlocked at TGE</td></tr>
+            <tr><td>Child savings reserve</td><td class="num">10%</td><td class="num mono">2.10B</td><td>Parent-deposit matching bonuses</td></tr>
+            <tr><td>Liquidity (CEX/DEX)</td><td class="num">5%</td><td class="num mono">1.05B</td><td>Unlocked at TGE / LP incentives</td></tr>
+            <tr style="border-top:2px solid var(--accent);"><td><strong>Total</strong></td><td class="num"><strong>100%</strong></td><td class="num mono"><strong>21.00B</strong></td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📊 30-Year Scenario Results</div>
+        <table>
+          <thead>
+            <tr><th>Scenario</th><th>Children (M)</th><th>Child Pool ($B)</th><th>FTC Price</th><th>Market Cap ($B)</th><th>Treasury ($B)</th><th>Burned (B)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><span class="pill red">Adverse</span></td><td class="num">19.8</td><td class="num">$9.6</td><td class="num mono">$1.07</td><td class="num">$10</td><td class="num">$8.5</td><td class="num">1.25</td></tr>
+            <tr><td><span class="pill orange">Conservative</span></td><td class="num">49.3</td><td class="num">$43.5</td><td class="num mono">$7.85</td><td class="num">$74</td><td class="num">$76</td><td class="num">1.83</td></tr>
+            <tr><td><span class="pill blue">Base Case</span></td><td class="num">98.4</td><td class="num">$139.5</td><td class="num mono">$26.07</td><td class="num">$246</td><td class="num">$240</td><td class="num">1.67</td></tr>
+            <tr><td><span class="pill green">Abundance</span></td><td class="num">245.9</td><td class="num">$754.2</td><td class="num mono">$130.16</td><td class="num">$1,230</td><td class="num">$1,096</td><td class="num">1.41</td></tr>
+          </tbody>
+        </table>
+        <div class="doc-content" style="margin-top:16px;">
+          <p class="muted">Even in the Adverse scenario, the protocol delivers $9.6B in aggregate child wealth because the model relies on compounding deposits and conservative yield rather than speculative price appreciation. In the Base Case, the network creates ~$140B in aggregate child wealth over 30 years.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">💸 Fee Distribution</div>
+        <div class="bar-chart">
+          <div class="bar-row">
+            <div class="bar-label">Buyback & Burn</div>
+            <div class="bar-track"><div class="bar-fill" style="width:25%;background:#ff6b6b;">25%</div></div>
+            <div class="bar-value">25%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">→ Yield Reserve</div>
+            <div class="bar-track"><div class="bar-fill" style="width:35%;background:#4f9eff;">35%</div></div>
+            <div class="bar-value">35%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Store Operations</div>
+            <div class="bar-track"><div class="bar-fill" style="width:30%;background:#00d4aa;">30%</div></div>
+            <div class="bar-value">30%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Liquidity</div>
+            <div class="bar-track"><div class="bar-fill" style="width:10%;background:#ffb347;">10%</div></div>
+            <div class="bar-value">10%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🏦 Child Account Mechanics</div>
+        <div class="doc-content">
+          <h3>Deposits</h3>
+          <ul>
+            <li>Base deposit: <strong>$250</strong> equivalent in FTC</li>
+            <li>Treasury 1:1 match for qualifying low-income families (up to $500 effective)</li>
+            <li>Match drawn from child savings reserve (2.10B FTC)</li>
+          </ul>
+          <h3>Yield</h3>
+          <ul>
+            <li>Treasury APY: ~7% (return on protocol-owned assets)</li>
+            <li>Protocol subsidy APY: ~4% (from fees, declining as cohort ages)</li>
+            <li>Yield is a <strong>protocol parameter, not a fixed promise</strong></li>
+          </ul>
+          <h3>Payouts</h3>
+          <ul>
+            <li>Windows: ages 5, 10, 15, 20, 25</li>
+            <li>Max 25% of balance per checkpoint</li>
+            <li>KYC required for cumulative withdrawals > $5,000</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTRACTS LIST -->
+    <div class="view" id="view-contracts">
+      <div class="view-header">
+        <h2>Smart Contracts</h2>
+        <p>3 core contracts — all compile clean with solc 0.8.24 + OpenZeppelin v5.1</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔷 FTC.sol — ERC-20 Token <span class="badge ok">5,513 bytes</span></div>
+        <div class="doc-content">
+          <ul>
+            <li><strong>21B fixed supply</strong> — minted once at genesis, no future minting</li>
+            <li>7-way allocation matching TOKENOMICS_SPEC.md</li>
+            <li><code>BURNER_ROLE</code> — only Treasury/FeeDispatcher can burn (25% of merchant fees)</li>
+            <li><code>PAUSER_ROLE</code> — emergency pause on all transfers</li>
+            <li><code>ERC20Burnable</code> + <code>AccessControl</code> + <code>Pausable</code></li>
+            <li>24 functions, 9 events, 11 custom errors</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">👤 GuardianRegistry.sol — Guardian/Child Registry <span class="badge ok">5,063 bytes</span></div>
+        <div class="doc-content">
+          <ul>
+            <li>Guardian registration with identity verification flag</li>
+            <li>Child registration with privacy-preserving <code>childIdHash</code> (no raw PII on-chain)</li>
+            <li><code>AGE_ATTESTOR_ROLE</code> — confirms child birth timestamp</li>
+            <li><code>KYC_ISSUER_ROLE</code> — full KYC attestation for large withdrawals</li>
+            <li>Withdrawal tracking with $5,000 KYC threshold</li>
+            <li><code>wouldRequireKYC()</code> view for pre-checking</li>
+            <li>30 functions, 10 events, 12 custom errors</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🏦 ChildSavingsVault.sol — Age-Gated Savings <span class="badge ok">7,165 bytes</span></div>
+        <div class="doc-content">
+          <ul>
+            <li>Age-gated payouts at <strong>5, 10, 15, 20, 25</strong> years (immutable)</li>
+            <li>Max <strong>25% of balance</strong> per checkpoint (2500 bps, immutable)</li>
+            <li>Floating yield rate (<code>YIELD_SETTER_ROLE</code>) — NOT a guarantee</li>
+            <li><strong>1:1 treasury match</strong> for qualifying low-income families</li>
+            <li>Pre-payout yield accrual — guardians get accrued interest at withdrawal</li>
+            <li>KYC enforcement via <code>GuardianRegistry.recordWithdrawal()</code></li>
+            <li><code>ReentrancyGuard</code> on all deposit/payout functions</li>
+            <li>40 functions, 11 events, 13 custom errors</li>
+          </ul>
+        </div>
+      </div>
+    </div>

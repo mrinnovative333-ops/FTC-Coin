@@ -1,0 +1,2392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FTC — For The Children</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --bg: #060815;
+  --surface: #0d1120;
+  --surface2: #141a2e;
+  --surface3: #1a2138;
+  --border: rgba(79,158,255,0.12);
+  --border2: rgba(79,158,255,0.25);
+  --accent: #4f9eff;
+  --accent2: #00d4aa;
+  --accent3: #b46bff;
+  --text: #e8ecf5;
+  --text2: #7a85a3;
+  --text3: #4a5478;
+  --warn: #ffb347;
+  --danger: #ff5577;
+  --success: #00d4aa;
+  --mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  --sans: 'Inter', -apple-system, sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x:hidden;
+}
+
+/* ─── Animated Background ─── */
+.bg-canvas {
+  position:fixed; top:0; left:0; width:100%; height:100%; z-index:0;
+  background: radial-gradient(ellipse at 20% 0%, rgba(79,158,255,0.08) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 100%, rgba(0,212,170,0.06) 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 50%, rgba(180,107,255,0.04) 0%, transparent 60%);
+  pointer-events:none;
+}
+.bg-grid {
+  position:fixed; top:0; left:0; width:100%; height:100%; z-index:0;
+  background-image: linear-gradient(rgba(79,158,255,0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(79,158,255,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events:none;
+  animation: gridPan 60s linear infinite;
+}
+@keyframes gridPan {
+  0% { transform: translate(0,0); }
+  100% { transform: translate(60px,60px); }
+}
+
+.app { display:flex; min-height:100vh; position:relative; z-index:1; }
+
+/* ─── Sidebar ─── */
+.sidebar {
+  width: 260px;
+  background: rgba(13,17,32,0.85);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid var(--border);
+  position: fixed; height:100vh; overflow-y:auto; z-index:100;
+  transition: transform 0.3s ease;
+}
+.sidebar-header {
+  padding: 28px 20px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-logo {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; font-weight:900; color:#fff;
+  margin-bottom:12px;
+  box-shadow: 0 4px 20px rgba(79,158,255,0.3);
+  animation: logoFloat 4s ease-in-out infinite;
+}
+@keyframes logoFloat {
+  0%,100% { transform: translateY(0); box-shadow: 0 4px 20px rgba(79,158,255,0.3); }
+  50% { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(79,158,255,0.5); }
+}
+.sidebar-header h1 {
+  font-size: 18px; font-weight: 800; letter-spacing:-0.5px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.sidebar-header .subtitle {
+  font-size:10px; color:var(--text3); margin-top:4px;
+  text-transform:uppercase; letter-spacing:2px; font-weight:600;
+}
+.nav-section { padding:12px 0; border-bottom:1px solid var(--border); }
+.nav-section-title {
+  font-size:9px; text-transform:uppercase; letter-spacing:2px;
+  color:var(--text3); padding:8px 20px; font-weight:700;
+}
+.nav-item {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 20px; font-size:13px; font-weight:500;
+  color:var(--text2); cursor:pointer; transition:all 0.2s;
+  border-left:3px solid transparent; position:relative;
+}
+.nav-item:hover { background:rgba(79,158,255,0.05); color:var(--text); }
+.nav-item.active {
+  background:linear-gradient(90deg, rgba(79,158,255,0.12), transparent);
+  color:var(--accent); border-left-color:var(--accent);
+}
+.nav-item .icon { font-size:15px; width:20px; text-align:center; }
+.nav-item .pill-mini {
+  font-size:9px; padding:1px 6px; border-radius:4px;
+  background:rgba(0,212,170,0.15); color:var(--success); font-weight:600;
+}
+
+/* ─── Main ─── */
+.main { margin-left:260px; flex:1; padding:0; max-width:100%; }
+.view { display:none; padding:40px 48px; min-height:100vh; }
+.view.active { display:block; animation: viewFadeIn 0.4s ease; }
+@keyframes viewFadeIn {
+  from { opacity:0; transform:translateY(12px); }
+  to { opacity:1; transform:translateY(0); }
+}
+.view-header { margin-bottom:32px; }
+.view-header h2 {
+  font-size:32px; font-weight:800; letter-spacing:-1px; margin-bottom:6px;
+}
+.view-header p { color:var(--text2); font-size:14px; font-weight:400; }
+
+/* ─── Hero (Overview) ─── */
+.hero {
+  position:relative; padding:48px 0 32px; margin-bottom:32px;
+  border-bottom:1px solid var(--border);
+}
+.hero-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 14px; border-radius:20px;
+  background:rgba(0,212,170,0.1); border:1px solid rgba(0,212,170,0.2);
+  font-size:11px; font-weight:600; color:var(--success);
+  text-transform:uppercase; letter-spacing:1px; margin-bottom:20px;
+  animation: badgePulse 3s ease-in-out infinite;
+}
+@keyframes badgePulse {
+  0%,100% { box-shadow:0 0 0 0 rgba(0,212,170,0.3); }
+  50% { box-shadow:0 0 0 8px rgba(0,212,170,0); }
+}
+.hero h2 {
+  font-size:48px; font-weight:900; letter-spacing:-2px; line-height:1.1; margin-bottom:16px;
+  background: linear-gradient(135deg, #fff 0%, var(--accent) 50%, var(--accent2) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.hero p {
+  font-size:18px; color:var(--text2); max-width:600px; font-weight:300; line-height:1.7;
+}
+
+/* ─── Stats Grid ─── */
+.stats-grid {
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+  gap:16px; margin-bottom:32px;
+}
+.stat-card {
+  background:linear-gradient(135deg, var(--surface), var(--surface2));
+  border:1px solid var(--border); border-radius:16px; padding:24px;
+  text-align:center; position:relative; overflow:hidden;
+  transition: all 0.3s ease;
+}
+.stat-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg, var(--accent), var(--accent2));
+  opacity:0.6;
+}
+.stat-card:hover {
+  transform:translateY(-4px); border-color:var(--border2);
+  box-shadow:0 12px 40px rgba(79,158,255,0.1);
+}
+.stat-card .stat-value {
+  font-size:36px; font-weight:800; color:var(--accent);
+  font-family:var(--mono); letter-spacing:-1px;
+}
+.stat-card .stat-label {
+  font-size:11px; color:var(--text2); text-transform:uppercase;
+  letter-spacing:1.5px; margin-top:8px; font-weight:600;
+}
+.stat-card .stat-sub { font-size:11px; color:var(--text3); margin-top:4px; }
+
+/* ─── Cards ─── */
+.card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:16px; padding:28px; margin-bottom:20px;
+  transition:border-color 0.3s;
+}
+.card:hover { border-color:var(--border2); }
+.card-title {
+  font-size:16px; font-weight:700; margin-bottom:18px;
+  display:flex; align-items:center; gap:10px;
+}
+.badge {
+  font-size:10px; padding:3px 10px; border-radius:6px;
+  font-weight:700; text-transform:uppercase; letter-spacing:0.5px;
+}
+.badge.ok { background:rgba(0,212,170,0.12); color:var(--success); }
+.badge.warn { background:rgba(255,179,71,0.12); color:var(--warn); }
+.badge.info { background:rgba(79,158,255,0.12); color:var(--accent); }
+
+/* ─── Table ─── */
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th {
+  text-align:left; padding:12px 16px; background:var(--surface2);
+  color:var(--text2); font-weight:700; text-transform:uppercase;
+  font-size:10px; letter-spacing:1px; border-bottom:1px solid var(--border2);
+}
+td {
+  padding:14px 16px; border-bottom:1px solid var(--border); transition:background 0.2s;
+}
+tr:hover td { background:var(--surface2); }
+td.mono { font-family:var(--mono); font-size:12px; }
+td.num { text-align:right; font-family:var(--mono); }
+
+/* ─── Decision cards ─── */
+.decision-card {
+  background:linear-gradient(135deg, var(--surface), var(--surface2));
+  border:1px solid var(--border); border-radius:16px; padding:28px;
+  margin-bottom:16px; border-left:4px solid var(--accent);
+  transition:all 0.3s; position:relative; overflow:hidden;
+}
+.decision-card::after {
+  content:''; position:absolute; top:-50%; right:-20%; width:200px; height:200px;
+  background:radial-gradient(circle, rgba(79,158,255,0.05), transparent);
+  border-radius:50%; pointer-events:none;
+}
+.decision-card:hover { transform:translateX(4px); border-left-width:6px; }
+.decision-card .d-num {
+  font-size:11px; color:var(--text3); font-weight:700;
+  text-transform:uppercase; letter-spacing:1.5px;
+}
+.decision-card .d-title { font-size:20px; font-weight:700; margin:6px 0 10px; }
+.decision-card .d-answer {
+  font-size:16px; color:var(--accent2); font-weight:600; margin-bottom:12px;
+  line-height:1.5;
+}
+.decision-card .d-rationale { font-size:14px; color:var(--text2); line-height:1.8; }
+
+/* ─── Code blocks ─── */
+.code-block {
+  background:#0a0d18; border:1px solid var(--border); border-radius:12px;
+  padding:24px; overflow:auto; font-family:var(--mono); font-size:12px;
+  line-height:1.6; max-height:650px; white-space:pre;
+}
+.code-block .kw { color:#ff7b72; }
+.code-block .str { color:#a5d6ff; }
+.code-block .cmt { color:#6e7681; font-style:italic; }
+.code-block .num { color:#79c0ff; }
+.code-block .fn { color:#d2a8ff; }
+.code-block .typ { color:#ffa657; }
+
+/* ─── ABI ─── */
+.abi-func {
+  background:var(--surface2); border-radius:8px; padding:10px 14px;
+  margin-bottom:6px; font-family:var(--mono); font-size:12px;
+  transition:background 0.2s;
+}
+.abi-func:hover { background:var(--surface3); }
+.abi-func .fn-name { color:var(--accent2); font-weight:600; }
+.abi-func .fn-type {
+  color:var(--warn); font-size:9px; padding:2px 7px; border-radius:4px;
+  background:rgba(255,179,71,0.08); text-transform:uppercase; font-weight:700;
+}
+.abi-func .fn-args { color:var(--text2); }
+.abi-event { border-left:3px solid var(--accent); }
+.abi-error { border-left:3px solid var(--danger); }
+
+/* ─── Bars ─── */
+.bar-chart { margin:20px 0; }
+.bar-row { display:flex; align-items:center; gap:14px; margin-bottom:12px; }
+.bar-label { width:120px; font-size:13px; text-align:right; font-weight:500; }
+.bar-track {
+  flex:1; height:32px; background:var(--surface2); border-radius:8px;
+  overflow:hidden; position:relative;
+}
+.bar-fill {
+  height:100%; border-radius:8px; display:flex; align-items:center;
+  padding-left:12px; font-size:11px; font-family:var(--mono); color:#fff;
+  font-weight:600; transition:width 1.2s cubic-bezier(0.16,1,0.3,1);
+  animation: barGrow 1.2s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes barGrow { from { width:0; } }
+.bar-value {
+  width:100px; font-size:13px; font-family:var(--mono); color:var(--text2); font-weight:500;
+}
+
+/* ─── Tabs ─── */
+.tabs {
+  display:flex; gap:4px; margin-bottom:20px;
+  border-bottom:1px solid var(--border);
+}
+.tab {
+  padding:12px 20px; font-size:13px; font-weight:600; color:var(--text2);
+  cursor:pointer; border-bottom:2px solid transparent; transition:all 0.2s;
+}
+.tab:hover { color:var(--text); }
+.tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+/* ─── Pills ─── */
+.pill {
+  display:inline-block; padding:4px 12px; border-radius:20px;
+  font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;
+}
+.pill.green { background:rgba(0,212,170,0.12); color:var(--success); }
+.pill.blue { background:rgba(79,158,255,0.12); color:var(--accent); }
+.pill.orange { background:rgba(255,179,71,0.12); color:var(--warn); }
+.pill.red { background:rgba(255,85,119,0.12); color:var(--danger); }
+
+/* ─── Doc content ─── */
+.doc-content { font-size:14px; line-height:1.8; color:var(--text); }
+.doc-content h1 { font-size:26px; margin:24px 0 12px; font-weight:800; }
+.doc-content h2 { font-size:20px; margin:20px 0 10px; color:var(--accent); font-weight:700; }
+.doc-content h3 { font-size:16px; margin:14px 0 8px; font-weight:600; }
+.doc-content p { margin-bottom:12px; color:var(--text); }
+.doc-content ul, .doc-content ol { margin:8px 0 16px 24px; }
+.doc-content li { margin-bottom:6px; }
+.doc-content code {
+  font-family:var(--mono); background:var(--surface3); padding:3px 8px;
+  border-radius:4px; font-size:12px; color:var(--accent2);
+}
+.doc-content table { margin:16px 0; }
+.doc-content strong { color:var(--accent2); font-weight:700; }
+.doc-content hr { border:none; border-top:1px solid var(--border); margin:24px 0; }
+.doc-content blockquote {
+  border-left:3px solid var(--accent); padding-left:16px;
+  color:var(--text2); margin:16px 0; font-style:italic;
+}
+
+.muted { color:var(--text2); }
+.success { color:var(--success); }
+.warn { color:var(--warn); }
+.danger { color:var(--danger); }
+
+/* ─── Particle canvas ─── */
+#particles { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+
+/* ─── Contract role chips ─── */
+.role-chip {
+  display:inline-block; padding:4px 10px; border-radius:6px;
+  background:var(--surface3); font-family:var(--mono); font-size:11px;
+  color:var(--accent2); margin:2px; border:1px solid var(--border);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .sidebar { transform:translateX(-260px); }
+  .main { margin-left:0; }
+  .view { padding:24px 20px; }
+  .hero h2 { font-size:32px; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+<div class="bg-canvas"></div>
+<div class="bg-grid"></div>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">F</div>
+      <h1>For The Children</h1>
+      <div class="subtitle">FTC Protocol</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">Overview</div>
+      <div class="nav-item active" data-view="overview"><span class="icon">◆</span> Overview</div>
+      <div class="nav-item" data-view="decisions"><span class="icon">✓</span> Decisions</div>
+      <div class="nav-item" data-view="tokenomics"><span class="icon">$</span> Tokenomics</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">Smart Contracts</div>
+      <div class="nav-item" data-view="contracts"><span class="icon">◇</span> All Contracts</div>
+      <div class="nav-item" data-view="ftc-sol"><span class="icon">◆</span> FTC.sol</div>
+      <div class="nav-item" data-view="guardian-sol"><span class="icon">◇</span> GuardianRegistry</div>
+      <div class="nav-item" data-view="vault-sol"><span class="icon">◇</span> ChildSavingsVault</div>
+      <div class="nav-item" data-view="abi"><span class="icon">⊕</span> ABI Reference</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">Documentation</div>
+      <div class="nav-item" data-view="doc-architecture"><span class="icon">☰</span> Architecture</div>
+      <div class="nav-item" data-view="doc-charter"><span class="icon">☰</span> Project Charter</div>
+      <div class="nav-item" data-view="doc-executive"><span class="icon">☰</span> Executive Summary</div>
+      <div class="nav-item" data-view="doc-risk"><span class="icon">☰</span> Risk Register</div>
+      <div class="nav-item" data-view="doc-roadmap"><span class="icon">☰</span> Testnet Roadmap</div>
+      <div class="nav-item" data-view="doc-legal"><span class="icon">☰</span> Legal</div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <div class="view active" id="view-overview">
+      <div class="hero">
+        <div class="hero-badge">● All Systems Operational — Contracts Compiled</div>
+        <h2>For The Children<br>Protocol Dashboard</h2>
+        <p>A blockchain-based child savings protocol on Base L2. 21 billion fixed supply. Age-gated payouts. Treasury-matched deposits for low-income families. Built to create $140B in child wealth over 30 years.</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">21B</div>
+          <div class="stat-label">Token Supply</div>
+          <div class="stat-sub">Fixed at genesis, no mint</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">3</div>
+          <div class="stat-label">Contracts Built</div>
+          <div class="stat-sub">All compile clean ✅</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">17.7<span style="font-size:20px">KB</span></div>
+          <div class="stat-label">Total Bytecode</div>
+          <div class="stat-sub">Under 24KB EVM limit</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">$250</div>
+          <div class="stat-label">Base Deposit</div>
+          <div class="stat-sub">+ 1:1 match for low-income</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">Base</div>
+          <div class="stat-label">Target L2</div>
+          <div class="stat-sub">Coinbase L2</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">$140B</div>
+          <div class="stat-label">Base Case 30yr</div>
+          <div class="stat-sub">Child wealth created</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Protocol Summary</div>
+        <div class="doc-content">
+          <ul>
+            <li><strong>21 billion fixed supply</strong> — minted once at genesis, no future inflation</li>
+            <li><strong>Age-gated payouts</strong> — children withdraw at ages 5, 10, 15, 20, and 25 (max 25% per checkpoint)</li>
+            <li><strong>Treasury-matched deposits</strong> — low-income families get 1:1 match up to $500 effective deposit</li>
+            <li><strong>Partner-merchant stores</strong> — 10–30% discounts at participating retailers</li>
+            <li><strong>Deflationary burn</strong> — 25% of merchant fees burned permanently</li>
+            <li><strong>Floating yield</strong> — protocol parameter based on treasury returns, not a guarantee</li>
+            <li><strong>Lightweight KYC</strong> — guardian ID at creation, full KYC only at $5,000+ withdrawals</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Contract Status</div>
+        <table>
+          <thead><tr><th>Contract</th><th>File</th><th>Bytecode</th><th>Functions</th><th>Events</th><th>Errors</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td><strong>FTC</strong></td><td class="mono">FTC.sol</td><td class="num">5,513 B</td><td class="num">24</td><td class="num">9</td><td class="num">11</td><td><span class="pill green">Compiled</span></td></tr>
+            <tr><td><strong>GuardianRegistry</strong></td><td class="mono">GuardianRegistry.sol</td><td class="num">5,063 B</td><td class="num">30</td><td class="num">10</td><td class="num">12</td><td><span class="pill green">Compiled</span></td></tr>
+            <tr><td><strong>ChildSavingsVault</strong></td><td class="mono">ChildSavingsVault.sol</td><td class="num">7,165 B</td><td class="num">40</td><td class="num">11</td><td class="num">13</td><td><span class="pill green">Compiled</span></td></tr>
+            <tr><td class="muted">Treasury</td><td class="mono muted">Treasury.sol</td><td class="num muted">—</td><td class="num muted">—</td><td class="num muted">—</td><td class="num muted">—</td><td><span class="pill orange">Phase 1+</span></td></tr>
+            <tr><td class="muted">FeeDispatcher</td><td class="mono muted">FeeDispatcher.sol</td><td class="num muted">—</td><td class="num muted">—</td><td class="num muted">—</td><td class="num muted">—</td><td><span class="pill orange">Phase 1+</span></td></tr>
+            <tr><td class="muted">StoreDiscount</td><td class="mono muted">StoreDiscount.sol</td><td class="num muted">—</td><td class="num muted">—</td><td class="num muted">—</td><td class="num muted">—</td><td><span class="pill orange">Phase 1+</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">30-Year Simulation — Child Balance Pool ($B)</div>
+        <div class="bar-chart">
+          <div class="bar-row">
+            <div class="bar-label">Adverse</div>
+            <div class="bar-track"><div class="bar-fill" style="width:1.3%;background:linear-gradient(90deg,#ff5577,#ff7799);">$9.6B</div></div>
+            <div class="bar-value">$9.6B</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Conservative</div>
+            <div class="bar-track"><div class="bar-fill" style="width:5.8%;background:linear-gradient(90deg,#ffb347,#ffd194);">$43.5B</div></div>
+            <div class="bar-value">$43.5B</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Base Case</div>
+            <div class="bar-track"><div class="bar-fill" style="width:18.5%;background:linear-gradient(90deg,#4f9eff,#7fb8ff);">$139.5B</div></div>
+            <div class="bar-value">$139.5B</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Abundance</div>
+            <div class="bar-track"><div class="bar-fill" style="width:100%;background:linear-gradient(90deg,#00d4aa,#00ffcc);">$754.2B</div></div>
+            <div class="bar-value">$754.2B</div>
+          </div>
+        </div>
+        <div class="bar-chart" style="margin-top:28px;">
+          <div style="font-size:13px;margin-bottom:12px;color:var(--text2);font-weight:500;">FTC Token Price (30-Year Final)</div>
+          <div class="bar-row">
+            <div class="bar-label">Adverse</div>
+            <div class="bar-track"><div class="bar-fill" style="width:0.8%;background:linear-gradient(90deg,#ff5577,#ff7799);">$1.07</div></div>
+            <div class="bar-value">$1.07</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Conservative</div>
+            <div class="bar-track"><div class="bar-fill" style="width:6%;background:linear-gradient(90deg,#ffb347,#ffd194);">$7.85</div></div>
+            <div class="bar-value">$7.85</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Base Case</div>
+            <div class="bar-track"><div class="bar-fill" style="width:20%;background:linear-gradient(90deg,#4f9eff,#7fb8ff);">$26.07</div></div>
+            <div class="bar-value">$26.07</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Abundance</div>
+            <div class="bar-track"><div class="bar-fill" style="width:100%;background:linear-gradient(90deg,#00d4aa,#00ffcc);">$130.16</div></div>
+            <div class="bar-value">$130.16</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="view" id="view-decisions">
+      <div class="view-header">
+        <h2>Design Decisions</h2>
+        <p>6 open questions — resolved 2026-07-17. Made with families and children as the primary lens.</p>
+      </div>
+
+      <div class="decision-card">
+        <div class="d-num">Decision 1</div>
+        <div class="d-title">L2 Choice</div>
+        <div class="d-answer">→ Base (Coinbase L2)</div>
+        <div class="d-rationale">This project onboards families, not traders. Base provides the easiest fiat onramp for non-crypto-native parents — deposit dollars via Coinbase, get FTC, no bridges or sidechains. Low fees, growing ecosystem, consumer-facing team. Families don't need to understand L2s; they just need it to work.</div>
+      </div>
+      <div class="decision-card" style="border-left-color:var(--accent3);">
+        <div class="d-num">Decision 2</div>
+        <div class="d-title">Legal Home</div>
+        <div class="d-answer">→ Delaware C-Corp + Wyoming DAO LLC + Swiss Foundation</div>
+        <div class="d-rationale">Delaware C-Corp for US fundraising. Wyoming DAO LLC for on-chain governance legal personhood. Swiss foundation (Stiftung) to hold the treasury and mission — the Ethereum Foundation uses this structure. Protects the mission from profit pressure. <strong>Caveat:</strong> Requires securities counsel sign-off before commitment.</div>
+      </div>
+      <div class="decision-card" style="border-left-color:var(--warn);">
+        <div class="d-num">Decision 3</div>
+        <div class="d-title">KYC Model</div>
+        <div class="d-answer">→ Lightweight — guardian ID at creation, full KYC at $5,000+ withdrawals</div>
+        <div class="d-rationale">Full KYC on every child account would lock out the unbanked, undocumented, and rural families who lack clean identity documents. Guardian identity verified at account creation. Full KYC attestation only when cumulative withdrawals cross $5,000. The neediest families come first.</div>
+      </div>
+      <div class="decision-card" style="border-left-color:var(--success);">
+        <div class="d-num">Decision 4</div>
+        <div class="d-title">FTC Stores</div>
+        <div class="d-answer">→ Partner-merchant discount network (no owned stores)</div>
+        <div class="d-rationale">Partner with merchants families already use — groceries, pharmacies, clothing, education, healthcare. Capital-light, fast to scale, reaches more families sooner. Owning stores is a massive operational distraction that delays the actual benefit to children.</div>
+      </div>
+      <div class="decision-card" style="border-left-color:var(--danger);">
+        <div class="d-num">Decision 5</div>
+        <div class="d-title">Raise Size / Valuation</div>
+        <div class="d-answer">→ $8–15M public sale, target initial market cap $60–80M</div>
+        <div class="d-rationale">Conservative on purpose. The simulation's conservative case lands at ~$74M market cap — use that as the ceiling, not the floor. A modest raise avoids front-loading speculative pressure from large token holders who expect quick flips. Value comes from deposits, compounding, and adoption — not a token pump.</div>
+      </div>
+      <div class="decision-card" style="border-left-color:var(--accent2);">
+        <div class="d-num">Decision 6</div>
+        <div class="d-title">Deposit Norm</div>
+        <div class="d-answer">→ $250 base, 1:1 treasury match for low-income families (up to $500 effective)</div>
+        <div class="d-rationale">$500 is a month's income in many parts of the world. Too high for the most vulnerable families. The treasury can absorb the match because the compounding model creates long-term value, not the initial deposit size. The neediest families come up with $250 and get $500 working for their child.</div>
+      </div>
+
+      <div class="card" style="border-left:4px solid var(--warn); margin-top:24px;">
+        <div class="card-title">⚠ Pending Counsel Sign-Off</div>
+        <div class="doc-content">
+          <p>Decisions <strong>#2</strong> (legal structure) and <strong>#3</strong> (KYC threshold) have real legal weight. They are directionally sound but must be confirmed by securities counsel before being written into final contracts or filed with any regulator.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="view" id="view-tokenomics">
+      <div class="view-header">
+        <h2>Tokenomics</h2>
+        <p>21B fixed supply. 7-way genesis allocation. 30-year simulation across 4 scenarios.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Genesis Allocation</div>
+        <table>
+          <thead><tr><th>Bucket</th><th>Allocation</th><th>Tokens</th><th>Vesting / Lock</th></tr></thead>
+          <tbody>
+            <tr><td>Community rewards & incentives</td><td class="num">25%</td><td class="num mono">5.25B</td><td>Released over 10–20 years</td></tr>
+            <tr><td>Treasury</td><td class="num">20%</td><td class="num mono">4.20B</td><td>Protocol-owned; yield + subsidies</td></tr>
+            <tr><td>Team + advisors</td><td class="num">15%</td><td class="num mono">3.15B</td><td>1yr cliff, 4yr linear vest</td></tr>
+            <tr><td>Investors</td><td class="num">10%</td><td class="num mono">2.10B</td><td>1yr cliff, 3yr linear vest</td></tr>
+            <tr><td>Public sale</td><td class="num">15%</td><td class="num mono">3.15B</td><td>Unlocked at TGE</td></tr>
+            <tr><td>Child savings reserve</td><td class="num">10%</td><td class="num mono">2.10B</td><td>Deposit matching bonuses</td></tr>
+            <tr><td>Liquidity (CEX/DEX)</td><td class="num">5%</td><td class="num mono">1.05B</td><td>Unlocked at TGE</td></tr>
+            <tr style="border-top:2px solid var(--accent);"><td><strong>Total</strong></td><td class="num"><strong>100%</strong></td><td class="num mono"><strong>21.00B</strong></td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">30-Year Scenario Results</div>
+        <table>
+          <thead><tr><th>Scenario</th><th>Children (M)</th><th>Child Pool ($B)</th><th>FTC Price</th><th>Market Cap ($B)</th><th>Treasury ($B)</th><th>Burned (B)</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill red">Adverse</span></td><td class="num">19.8</td><td class="num">$9.6</td><td class="num mono">$1.07</td><td class="num">$10</td><td class="num">$8.5</td><td class="num">1.25</td></tr>
+            <tr><td><span class="pill orange">Conservative</span></td><td class="num">49.3</td><td class="num">$43.5</td><td class="num mono">$7.85</td><td class="num">$74</td><td class="num">$76</td><td class="num">1.83</td></tr>
+            <tr><td><span class="pill blue">Base Case</span></td><td class="num">98.4</td><td class="num">$139.5</td><td class="num mono">$26.07</td><td class="num">$246</td><td class="num">$240</td><td class="num">1.67</td></tr>
+            <tr><td><span class="pill green">Abundance</span></td><td class="num">245.9</td><td class="num">$754.2</td><td class="num mono">$130.16</td><td class="num">$1,230</td><td class="num">$1,096</td><td class="num">1.41</td></tr>
+          </tbody>
+        </table>
+        <div class="doc-content" style="margin-top:16px;">
+          <p class="muted">Even in the Adverse scenario, the protocol delivers $9.6B in aggregate child wealth because the model relies on compounding deposits and conservative yield rather than speculative price. In the Base Case, the network creates ~$140B in aggregate child wealth over 30 years.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Fee Distribution (Merchant Fees)</div>
+        <div class="bar-chart">
+          <div class="bar-row">
+            <div class="bar-label">Buyback & Burn</div>
+            <div class="bar-track"><div class="bar-fill" style="width:25%;background:linear-gradient(90deg,#ff5577,#ff7799);">25%</div></div>
+            <div class="bar-value">25%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">→ Yield Reserve</div>
+            <div class="bar-track"><div class="bar-fill" style="width:35%;background:linear-gradient(90deg,#4f9eff,#7fb8ff);">35%</div></div>
+            <div class="bar-value">35%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Store Operations</div>
+            <div class="bar-track"><div class="bar-fill" style="width:30%;background:linear-gradient(90deg,#00d4aa,#00ffcc);">30%</div></div>
+            <div class="bar-value">30%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">Liquidity</div>
+            <div class="bar-track"><div class="bar-fill" style="width:10%;background:linear-gradient(90deg,#ffb347,#ffd194);">10%</div></div>
+            <div class="bar-value">10%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Child Account Mechanics</div>
+        <div class="doc-content">
+          <h3>Deposits</h3>
+          <ul>
+            <li>Base deposit: <strong>$250</strong> equivalent in FTC</li>
+            <li>Treasury 1:1 match for qualifying low-income families (up to $500 effective)</li>
+            <li>Match drawn from child savings reserve (2.10B FTC)</li>
+          </ul>
+          <h3>Yield</h3>
+          <ul>
+            <li>Treasury APY: ~7% (return on protocol-owned assets)</li>
+            <li>Protocol subsidy APY: ~4% (from fees, declining as cohort ages)</li>
+            <li>Yield is a <strong>protocol parameter, not a fixed promise</strong></li>
+          </ul>
+          <h3>Payouts</h3>
+          <ul>
+            <li>Windows: ages 5, 10, 15, 20, 25</li>
+            <li>Max 25% of balance per checkpoint</li>
+            <li>KYC required for cumulative withdrawals > $5,000</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="view" id="view-contracts">
+      <div class="view-header">
+        <h2>Smart Contracts</h2>
+        <p>3 core contracts — all compile clean with solc 0.8.24 + OpenZeppelin v5.1</p>
+      </div>
+      <div class="card">
+        <div class="card-title">FTC.sol — ERC-20 Token <span class="badge ok">5,513 bytes</span></div>
+        <div class="doc-content">
+          <ul>
+            <li><strong>21B fixed supply</strong> — minted once at genesis, no future minting</li>
+            <li>7-way allocation matching TOKENOMICS_SPEC.md</li>
+            <li><code>BURNER_ROLE</code> — only Treasury/FeeDispatcher can burn</li>
+            <li><code>PAUSER_ROLE</code> — emergency pause on all transfers</li>
+            <li>Roles: <span class="role-chip">DEFAULT_ADMIN_ROLE</span> <span class="role-chip">BURNER_ROLE</span> <span class="role-chip">PAUSER_ROLE</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">GuardianRegistry.sol — Guardian/Child Registry <span class="badge ok">5,063 bytes</span></div>
+        <div class="doc-content">
+          <ul>
+            <li>Guardian registration with identity verification flag</li>
+            <li>Child registration with privacy-preserving <code>childIdHash</code></li>
+            <li><code>AGE_ATTESTOR_ROLE</code> — confirms child birth timestamp</li>
+            <li><code>KYC_ISSUER_ROLE</code> — full KYC for large withdrawals</li>
+            <li>$5,000 KYC threshold with <code>wouldRequireKYC()</code> pre-check</li>
+            <li>Roles: <span class="role-chip">KYC_ISSUER_ROLE</span> <span class="role-chip">AGE_ATTESTOR_ROLE</span> <span class="role-chip">PAUSER_ROLE</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">ChildSavingsVault.sol — Age-Gated Savings <span class="badge ok">7,165 bytes</span></div>
+        <div class="doc-content">
+          <ul>
+            <li>Age-gated payouts at <strong>5, 10, 15, 20, 25</strong> years (immutable)</li>
+            <li>Max <strong>25% of balance</strong> per checkpoint (immutable)</li>
+            <li>Floating yield rate — NOT a guarantee, protocol parameter</li>
+            <li><strong>1:1 treasury match</strong> for qualifying low-income families</li>
+            <li>Pre-payout yield accrual — guardians get accrued interest at withdrawal</li>
+            <li><code>ReentrancyGuard</code> on all deposit/payout functions</li>
+            <li>Roles: <span class="role-chip">YIELD_SETTER_ROLE</span> <span class="role-chip">MATCH_OPERATOR_ROLE</span> <span class="role-chip">PAUSER_ROLE</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="view" id="view-ftc-sol">
+      <div class="view-header">
+        <h2>FTC.sol — ERC-20 Token</h2>
+        <p>21B fixed supply. Burn role. Pausable. · 5,513 bytes bytecode</p>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="code-block" style="border:none;border-radius:16px;max-height:75vh;"><span class="cmt">// SPDX-License-Identifier: MIT</span>
+<span class="kw">pragma</span> solidity <span class="num">0</span>.<span class="num">8</span>.<span class="num">24</span>;
+
+<span class="kw">import</span> &quot;@openzeppelin/contracts/token/ERC20/ERC20.sol&quot;;
+<span class="kw">import</span> &quot;@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol&quot;;
+<span class="kw">import</span> &quot;@openzeppelin/contracts/access/AccessControl.sol&quot;;
+<span class="kw">import</span> &quot;@openzeppelin/contracts/utils/Pausable.sol&quot;;
+
+<span class="cmt">/// @title FTC — For The Children ERC-<span class="num">20</span> Token</span>
+<span class="cmt">/// @notice 21B fixed supply, minted once at genesis, no future minting.</span>
+<span class="cmt">///         <span class="num">25</span>% of merchant fees are burned via the BURNER_ROLE.</span>
+<span class="cmt">///         Deployed on Base L2.</span>
+<span class="kw">contract</span> FTC <span class="kw">is</span> ERC20, ERC20Burnable, AccessControl, Pausable {
+    <span class="cmt">// ────────────────────────── Roles ──────────────────────────</span>
+    <span class="kw">bytes32</span> <span class="kw">public</span> <span class="kw">constant</span> BURNER_ROLE = keccak256(&quot;BURNER_ROLE&quot;);
+    <span class="kw">bytes32</span> <span class="kw">public</span> <span class="kw">constant</span> PAUSER_ROLE = keccak256(&quot;PAUSER_ROLE&quot;);
+
+    <span class="cmt">// ──────────────────────── Constants ────────────────────────</span>
+    <span class="cmt">/// @notice <span class="num">21</span> billion FTC with <span class="num">18</span> decimals (same as ETH/USDC-style).</span>
+    <span class="kw">uint256</span> <span class="kw">public</span> <span class="kw">constant</span> MAX_SUPPLY = <span class="num">21_000_000_000</span> * 1e18;
+
+    <span class="cmt">// ────────────────────────── Events ─────────────────────────</span>
+    <span class="kw">event</span> GenesisAllocation(
+        <span class="kw">address</span> <span class="kw">indexed</span> treasury,
+        <span class="kw">address</span> <span class="kw">indexed</span> publicSale,
+        <span class="kw">address</span> <span class="kw">indexed</span> liquidity,
+        <span class="kw">address</span> team,
+        <span class="kw">address</span> investors,
+        <span class="kw">address</span> community,
+        <span class="kw">address</span> childReserve
+    );
+    <span class="kw">event</span> Burn(<span class="kw">address</span> <span class="kw">indexed</span> burner, <span class="kw">uint256</span> amount);
+
+    <span class="cmt">// ───────────────────────── Constructor ─────────────────────</span>
+    <span class="cmt">/// @dev All allocation addresses must be set at deployment; tokens are</span>
+    <span class="cmt">///      minted once and never again.</span>
+    <span class="kw">constructor</span>(
+        <span class="kw">address</span> treasury,
+        <span class="kw">address</span> publicSale,
+        <span class="kw">address</span> liquidity,
+        <span class="kw">address</span> team,
+        <span class="kw">address</span> investors,
+        <span class="kw">address</span> community,
+        <span class="kw">address</span> childReserve
+    ) ERC20(&quot;For The Children&quot;, &quot;FTC&quot;) {
+        <span class="cmt">// Verify no zero addresses</span>
+        <span class="kw">if</span> (
+            treasury == <span class="kw">address</span>(<span class="num">0</span>) ||
+            publicSale == <span class="kw">address</span>(<span class="num">0</span>) ||
+            liquidity == <span class="kw">address</span>(<span class="num">0</span>) ||
+            team == <span class="kw">address</span>(<span class="num">0</span>) ||
+            investors == <span class="kw">address</span>(<span class="num">0</span>) ||
+            community == <span class="kw">address</span>(<span class="num">0</span>) ||
+            childReserve == <span class="kw">address</span>(<span class="num">0</span>)
+        ) <span class="kw">revert</span> ZeroAddress();
+
+        <span class="cmt">// Grant roles</span>
+        _grantRole(DEFAULT_ADMIN_ROLE, <span class="kw">msg</span>.sender);
+        _grantRole(BURNER_ROLE, treasury);
+        _grantRole(PAUSER_ROLE, <span class="kw">msg</span>.sender);
+
+        <span class="cmt">// ── Genesis allocation (matches TOKENOMICS_SPEC.md) ──</span>
+        <span class="cmt">// Bucket                          %      Tokens (with 1e18)</span>
+        <span class="cmt">// Community rewards &amp; incentives   <span class="num">25</span>%    <span class="num">5</span>.25B</span>
+        <span class="cmt">// Treasury                         <span class="num">20</span>%    <span class="num">4</span>.20B</span>
+        <span class="cmt">// Team + advisors                  <span class="num">15</span>%    <span class="num">3</span>.15B</span>
+        <span class="cmt">// Investors                        <span class="num">10</span>%    <span class="num">2</span>.10B</span>
+        <span class="cmt">// Public sale                      <span class="num">15</span>%    <span class="num">3</span>.15B</span>
+        <span class="cmt">// Child savings reserve            <span class="num">10</span>%    <span class="num">2</span>.10B</span>
+        <span class="cmt">// Liquidity (CEX/DEX)               <span class="num">5</span>%    <span class="num">1</span>.05B</span>
+
+        _mint(community,    <span class="num">5_250_000_000</span> * 1e18); <span class="cmt">// <span class="num">25</span>%</span>
+        _mint(treasury,     <span class="num">4_200_000_000</span> * 1e18); <span class="cmt">// <span class="num">20</span>%</span>
+        _mint(team,         <span class="num">3_150_000_000</span> * 1e18); <span class="cmt">// <span class="num">15</span>%</span>
+        _mint(investors,    <span class="num">2_100_000_000</span> * 1e18); <span class="cmt">// <span class="num">10</span>%</span>
+        _mint(publicSale,   <span class="num">3_150_000_000</span> * 1e18); <span class="cmt">// <span class="num">15</span>%</span>
+        _mint(childReserve, <span class="num">2_100_000_000</span> * 1e18); <span class="cmt">// <span class="num">10</span>%</span>
+        _mint(liquidity,    <span class="num">1_050_000_000</span> * 1e18); <span class="cmt">//  <span class="num">5</span>%</span>
+
+        <span class="cmt">// Total = 21B exactly</span>
+        <span class="kw">assert</span>(totalSupply() == MAX_SUPPLY);
+
+        emit GenesisAllocation(
+            treasury, publicSale, liquidity, team, investors, community, childReserve
+        );
+    }
+
+    <span class="cmt">// ──────────────────────── Burn logic ───────────────────────</span>
+    <span class="cmt">/// @notice Burn tokens from the caller (BURNER_ROLE only).</span>
+    <span class="cmt">///         Used by FeeDispatcher to burn <span class="num">25</span>% of merchant fees.</span>
+    <span class="kw">function</span> burn(<span class="kw">uint256</span> amount) <span class="kw">public</span> <span class="kw">override</span> onlyRole(BURNER_ROLE) {
+        <span class="kw">super</span>.burn(amount);
+        emit Burn(<span class="kw">msg</span>.sender, amount);
+    }
+
+    <span class="cmt">/// @notice Burn tokens from a specific account (BURNER_ROLE only).</span>
+    <span class="kw">function</span> burnFrom(<span class="kw">address</span> account, <span class="kw">uint256</span> amount) <span class="kw">public</span> <span class="kw">override</span> onlyRole(BURNER_ROLE) {
+        <span class="kw">super</span>.burnFrom(account, amount);
+        emit Burn(account, amount);
+    }
+
+    <span class="cmt">// ────────────────────── Pause / unpause ────────────────────</span>
+    <span class="kw">function</span> pause() <span class="kw">external</span> onlyRole(PAUSER_ROLE) {
+        _pause();
+    }
+
+    <span class="kw">function</span> unpause() <span class="kw">external</span> onlyRole(PAUSER_ROLE) {
+        _unpause();
+    }
+
+    <span class="cmt">// ──────────────────────── Overrides ────────────────────────</span>
+    <span class="kw">function</span> _update(
+        <span class="kw">address</span> from,
+        <span class="kw">address</span> to,
+        <span class="kw">uint256</span> amount
+    ) <span class="kw">internal</span> <span class="kw">override</span> whenNotPaused {
+        <span class="kw">super</span>._update(from, to, amount);
+    }
+
+    <span class="cmt">// ──────────────────────── Errors ───────────────────────────</span>
+    <span class="kw">error</span> ZeroAddress();
+}</div>
+      </div>
+    </div>
+    
+    <div class="view" id="view-guardian-sol">
+      <div class="view-header">
+        <h2>GuardianRegistry.sol — Guardian/Child Registry</h2>
+        <p>KYC, age attestation, withdrawal tracking. · 5,063 bytes bytecode</p>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="code-block" style="border:none;border-radius:16px;max-height:75vh;"><span class="cmt">// SPDX-License-Identifier: MIT</span>
+<span class="kw">pragma</span> solidity <span class="num">0</span>.<span class="num">8</span>.<span class="num">24</span>;
+
+<span class="kw">import</span> &quot;@openzeppelin/contracts/access/AccessControl.sol&quot;;
+<span class="kw">import</span> &quot;@openzeppelin/contracts/utils/Pausable.sol&quot;;
+<span class="kw">import</span> &quot;@openzeppelin/contracts/utils/ReentrancyGuard.sol&quot;;
+
+<span class="cmt">/// @title GuardianRegistry</span>
+<span class="cmt">/// @notice Maps guardians (parents) to child accounts and manages</span>
+<span class="cmt">///         lightweight KYC/age attestations.</span>
+<span class="cmt">///</span>
+<span class="cmt">/// Design (per DECISIONS.md #<span class="num">3</span>):</span>
+<span class="cmt">///   - Guardian identity verified at account creation.</span>
+<span class="cmt">///   - Full KYC attestation only when cumulative withdrawals cross $<span class="num">5</span>,<span class="num">000</span>.</span>
+<span class="cmt">///   - No full KYC <span class="kw">for</span> small accounts or initial deposits.</span>
+<span class="kw">contract</span> GuardianRegistry <span class="kw">is</span> AccessControl, Pausable, ReentrancyGuard {
+    <span class="cmt">// ────────────────────────── Roles ──────────────────────────</span>
+    <span class="kw">bytes32</span> <span class="kw">public</span> <span class="kw">constant</span> KYC_ISSUER_ROLE = keccak256(&quot;KYC_ISSUER_ROLE&quot;);
+    <span class="kw">bytes32</span> <span class="kw">public</span> <span class="kw">constant</span> AGE_ATTESTOR_ROLE = keccak256(&quot;AGE_ATTESTOR_ROLE&quot;);
+    <span class="kw">bytes32</span> <span class="kw">public</span> <span class="kw">constant</span> PAUSER_ROLE = keccak256(&quot;PAUSER_ROLE&quot;);
+
+    <span class="cmt">// ──────────────────────── Constants ────────────────────────</span>
+    <span class="cmt">/// @notice KYC threshold: $<span class="num">5</span>,<span class="num">000</span> USD-equivalent in cumulative withdrawals.</span>
+    <span class="cmt">///         Set as a governance parameter; stored as FTC-wei equivalent</span>
+    <span class="cmt">///         (updated via oracle / governance).</span>
+    <span class="kw">uint256</span> <span class="kw">public</span> kycThreshold; <span class="cmt">// in FTC smallest unit (1e18 = <span class="num">1</span> FTC)</span>
+
+    <span class="cmt">// ──────────────────────── Data Types ───────────────────────</span>
+    <span class="kw">struct</span> Guardian {
+        <span class="kw">address</span> wallet;
+        <span class="kw">bool</span>   registered;
+        <span class="kw">bool</span>   identityVerified; <span class="cmt">// lightweight guardian identity at creation</span>
+        <span class="kw">uint256</span> childCount;
+        <span class="kw">bytes32</span>[] childIds;
+    }
+
+    <span class="kw">struct</span> ChildRecord {
+        <span class="kw">bytes32</span> childIdHash;      <span class="cmt">// privacy-preserving hash (not raw PII on-chain)</span>
+        <span class="kw">address</span> guardian;         <span class="cmt">// parent/guardian wallet</span>
+        <span class="kw">uint256</span> birthTimestamp;   <span class="cmt">// Unix timestamp of birth</span>
+        <span class="kw">bool</span>    ageAttested;      <span class="cmt">// birth timestamp confirmed by attester</span>
+        <span class="kw">bool</span>    kycVerified;      <span class="cmt">// full KYC <span class="kw">for</span> large withdrawals</span>
+        <span class="kw">uint256</span> cumulativeWithdrawals; <span class="cmt">// running total <span class="kw">for</span> KYC threshold check</span>
+    }
+
+    <span class="cmt">// ──────────────────────── State ────────────────────────────</span>
+    <span class="kw">mapping</span>(<span class="kw">address</span> =&gt; Guardian) <span class="kw">public</span> guardians;
+    <span class="kw">mapping</span>(<span class="kw">bytes32</span> =&gt; ChildRecord) <span class="kw">public</span> children;
+    <span class="cmt">// Double-link: guardian =&gt; childIdHash =&gt; exists</span>
+    <span class="kw">mapping</span>(<span class="kw">address</span> =&gt; <span class="kw">mapping</span>(<span class="kw">bytes32</span> =&gt; <span class="kw">bool</span>)) <span class="kw">public</span> guardianHasChild;
+
+    <span class="cmt">// ────────────────────────── Events ─────────────────────────</span>
+    <span class="kw">event</span> GuardianRegistered(<span class="kw">address</span> <span class="kw">indexed</span> guardian, <span class="kw">bool</span> identityVerified);
+    <span class="kw">event</span> ChildRegistered(
+        <span class="kw">bytes32</span> <span class="kw">indexed</span> childIdHash,
+        <span class="kw">address</span> <span class="kw">indexed</span> guardian,
+        <span class="kw">uint256</span> birthTimestamp
+    );
+    <span class="kw">event</span> AgeAttested(<span class="kw">bytes32</span> <span class="kw">indexed</span> childIdHash, <span class="kw">address</span> <span class="kw">indexed</span> attestor);
+    <span class="kw">event</span> KYCAttested(<span class="kw">bytes32</span> <span class="kw">indexed</span> childIdHash, <span class="kw">address</span> <span class="kw">indexed</span> issuer);
+    <span class="kw">event</span> KYCThresholdUpdated(<span class="kw">uint256</span> oldThreshold, <span class="kw">uint256</span> newThreshold);
+
+    <span class="cmt">// ────────────────────────── Errors ─────────────────────────</span>
+    <span class="kw">error</span> GuardianNotRegistered();
+    <span class="kw">error</span> GuardianIdentityNotVerified();
+    <span class="kw">error</span> ChildAlreadyExists();
+    <span class="kw">error</span> ChildNotFound();
+    <span class="kw">error</span> NotAuthorizedForChild();
+    <span class="kw">error</span> AgeNotAttested();
+    <span class="kw">error</span> KYCRequired();
+
+    <span class="cmt">// ───────────────────────── Constructor ─────────────────────</span>
+    <span class="kw">constructor</span>(<span class="kw">uint256</span> _kycThreshold) {
+        _grantRole(DEFAULT_ADMIN_ROLE, <span class="kw">msg</span>.sender);
+        _grantRole(PAUSER_ROLE, <span class="kw">msg</span>.sender);
+        kycThreshold = _kycThreshold;
+    }
+
+    <span class="cmt">// ───────────────────── Guardian Registration ───────────────</span>
+    <span class="cmt">/// @notice Register a guardian. Identity verification happens off-chain</span>
+    <span class="cmt">///         (via partner) but the result <span class="kw">is</span> recorded here.</span>
+    <span class="cmt">/// @param guardian The guardian&#x27;s wallet <span class="kw">address</span>.</span>
+    <span class="cmt">/// @param identityVerified Whether guardian identity was verified off-chain.</span>
+    <span class="kw">function</span> registerGuardian(
+        <span class="kw">address</span> guardian,
+        <span class="kw">bool</span> identityVerified
+    ) <span class="kw">external</span> onlyRole(KYC_ISSUER_ROLE) whenNotPaused nonReentrant {
+        <span class="kw">if</span> (guardian == <span class="kw">address</span>(<span class="num">0</span>)) <span class="kw">revert</span> GuardianNotRegistered();
+
+        guardians[guardian] = Guardian({
+            wallet: guardian,
+            registered: true,
+            identityVerified: identityVerified,
+            childCount: <span class="num">0</span>,
+            childIds: <span class="kw">new</span> <span class="kw">bytes32</span>[](<span class="num">0</span>)
+        });
+
+        emit GuardianRegistered(guardian, identityVerified);
+    }
+
+    <span class="cmt">// ─────────────────── Child Registration ────────────────────</span>
+    <span class="cmt">/// @notice Register a child under a guardian. The guardian must be</span>
+    <span class="cmt">///         registered and identity-verified.</span>
+    <span class="cmt">/// @param childIdHash A hash of the child&#x27;s identifying info (off-chain).</span>
+    <span class="cmt">/// @param birthTimestamp Unix timestamp of child&#x27;s birth.</span>
+    <span class="kw">function</span> registerChild(
+        <span class="kw">bytes32</span> childIdHash,
+        <span class="kw">uint256</span> birthTimestamp
+    ) <span class="kw">external</span> whenNotPaused nonReentrant {
+        Guardian <span class="kw">storage</span> g = guardians[<span class="kw">msg</span>.sender];
+        <span class="kw">if</span> (!g.registered) <span class="kw">revert</span> GuardianNotRegistered();
+        <span class="kw">if</span> (!g.identityVerified) <span class="kw">revert</span> GuardianIdentityNotVerified();
+        <span class="kw">if</span> (children[childIdHash].guardian != <span class="kw">address</span>(<span class="num">0</span>)) <span class="kw">revert</span> ChildAlreadyExists();
+        <span class="kw">if</span> (birthTimestamp == <span class="num">0</span> || birthTimestamp &gt; <span class="kw">block</span>.timestamp)
+            <span class="kw">revert</span> GuardianNotRegistered(); <span class="cmt">// invalid birth time</span>
+
+        children[childIdHash] = ChildRecord({
+            childIdHash: childIdHash,
+            guardian: <span class="kw">msg</span>.sender,
+            birthTimestamp: birthTimestamp,
+            ageAttested: false,
+            kycVerified: false,
+            cumulativeWithdrawals: <span class="num">0</span>
+        });
+
+        g.childIds.push(childIdHash);
+        g.childCount++;
+        guardianHasChild[<span class="kw">msg</span>.sender][childIdHash] = true;
+
+        emit ChildRegistered(childIdHash, <span class="kw">msg</span>.sender, birthTimestamp);
+    }
+
+    <span class="cmt">// ─────────────────────── Attestations ──────────────────────</span>
+    <span class="cmt">/// @notice Attest a child&#x27;s age/birth timestamp (AGE_ATTESTOR_ROLE).</span>
+    <span class="kw">function</span> attestAge(
+        <span class="kw">bytes32</span> childIdHash
+    ) <span class="kw">external</span> onlyRole(AGE_ATTESTOR_ROLE) whenNotPaused {
+        <span class="kw">if</span> (children[childIdHash].guardian == <span class="kw">address</span>(<span class="num">0</span>)) <span class="kw">revert</span> ChildNotFound();
+        children[childIdHash].ageAttested = true;
+        emit AgeAttested(childIdHash, <span class="kw">msg</span>.sender);
+    }
+
+    <span class="cmt">/// @notice Full KYC attestation <span class="kw">for</span> a child account (KYC_ISSUER_ROLE).</span>
+    <span class="cmt">///         Required when cumulative withdrawals exceed kycThreshold.</span>
+    <span class="kw">function</span> attestKYC(
+        <span class="kw">bytes32</span> childIdHash
+    ) <span class="kw">external</span> onlyRole(KYC_ISSUER_ROLE) whenNotPaused {
+        <span class="kw">if</span> (children[childIdHash].guardian == <span class="kw">address</span>(<span class="num">0</span>)) <span class="kw">revert</span> ChildNotFound();
+        children[childIdHash].kycVerified = true;
+        emit KYCAttested(childIdHash, <span class="kw">msg</span>.sender);
+    }
+
+    <span class="cmt">// ─────────────────── Withdrawal Tracking ───────────────────</span>
+    <span class="cmt">/// @notice Called by ChildSavingsVault before a payout to record</span>
+    <span class="cmt">///         cumulative withdrawals and enforce KYC threshold.</span>
+    <span class="cmt">/// @dev    Reverts <span class="kw">if</span> KYC <span class="kw">is</span> required but not yet attested.</span>
+    <span class="kw">function</span> recordWithdrawal(
+        <span class="kw">bytes32</span> childIdHash,
+        <span class="kw">uint256</span> amount
+    ) <span class="kw">external</span> onlyRole(KYC_ISSUER_ROLE) <span class="kw">returns</span> (<span class="kw">bool</span> kycNeeded) {
+        ChildRecord <span class="kw">storage</span> child = children[childIdHash];
+        <span class="kw">if</span> (child.guardian == <span class="kw">address</span>(<span class="num">0</span>)) <span class="kw">revert</span> ChildNotFound();
+
+        child.cumulativeWithdrawals += amount;
+
+        <span class="kw">if</span> (child.cumulativeWithdrawals &gt;= kycThreshold &amp;&amp; !child.kycVerified) {
+            <span class="kw">revert</span> KYCRequired();
+        }
+        <span class="kw">return</span> false; <span class="cmt">// KYC already done or not yet needed</span>
+    }
+
+    <span class="cmt">/// @notice Check <span class="kw">if</span> a withdrawal would trigger KYC requirement.</span>
+    <span class="kw">function</span> wouldRequireKYC(
+        <span class="kw">bytes32</span> childIdHash,
+        <span class="kw">uint256</span> amount
+    ) <span class="kw">external</span> <span class="kw">view</span> <span class="kw">returns</span> (<span class="kw">bool</span>) {
+        ChildRecord <span class="kw">storage</span> child = children[childIdHash];
+        <span class="kw">if</span> (child.guardian == <span class="kw">address</span>(<span class="num">0</span>)) <span class="kw">return</span> false;
+        <span class="kw">uint256</span> newTotal = child.cumulativeWithdrawals + amount;
+        <span class="kw">return</span> newTotal &gt;= kycThreshold &amp;&amp; !child.kycVerified;
+    }
+
+    <span class="cmt">// ──────────────────────── Views ────────────────────────────</span>
+    <span class="kw">function</span> isGuardian(<span class="kw">address</span> guardian) <span class="kw">external</span> <span class="kw">view</span> <span class="kw">returns</span> (<span class="kw">bool</span>) {
+        <span class="kw">return</span> guardians[guardian].registered;
+    }
+
+    <span class="kw">function</span> isIdentityVerified(<span class="kw">address</span> guardian) <span class="kw">external</span> <span class="kw">view</span> <span class="kw">returns</span> (<span class="kw">bool</span>) {
+        <span class="kw">return</span> guardians[guardian].identityVerified;
+    }
+
+    <span class="kw">function</span> getGuardianChildren(<span class="kw">address</span> guardian) <span class="kw">external</span> <span class="kw">view</span> <span class="kw">returns</span> (<span class="kw">bytes32</span>[] <span class="kw">memory</span>) {
+        <span class="kw">return</span> guardians[guardian].childIds;
+    }
+
+    <span class="kw">function</span> getChildGuardian(<span class="kw">bytes32</span> childIdHash) <span class="kw">external</span> <span class="kw">view</span> <span class="kw">returns</span> (<span class="kw">address</span>) {
+        <span class="kw">return</span> children[childIdHash].guardian;
+    }
+
+    <span class="kw">function</span> isAgeAttested(<span class="kw">bytes32</span> childIdHash) <span class="kw">external</span> <span class="kw">view</span> <span class="kw">returns</span> (<span class="kw">bool</span>) {
+        <span class="kw">return</span> children[childIdHash].ageAttested;
+    }
+
+    <span class="kw">function</span> isKYCVerified(<span class="kw">bytes32</span> childIdHash) <span class="kw">external</span> <span class="kw">view</span> <span class="kw">returns</span> (<span class="kw">bool</span>) {
+        <span class="kw">return</span> children[childIdHash].kycVerified;
+    }
+
+    <span class="cmt">// ──────────────────── Admin / Governance ───────────────────</span>
+    <span class="kw">function</span> setKycThreshold(<span class="kw">uint256</span> newThreshold) <span class="kw">external</span> onlyRole(DEFAULT_ADMIN_ROLE) {
+        emit KYCThresholdUpdated(kycThreshold, newThreshold);
+        kycThreshold = newThreshold;
+    }
+
+    <span class="kw">function</span> pause() <span class="kw">external</span> onlyRole(PAUSER_ROLE) {
+        _pause();
+    }
+
+    <span class="kw">function</span> unpause() <span class="kw">external</span> onlyRole(PAUSER_ROLE) {
+        _unpause();
+    }
+}</div>
+      </div>
+    </div>
+    
+    <div class="view" id="view-vault-sol">
+      <div class="view-header">
+        <h2>ChildSavingsVault.sol — Age-Gated Savings</h2>
+        <p>5-year payouts, 25% max, yield accrual, deposit match. · 7,165 bytes bytecode</p>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="code-block" style="border:none;border-radius:16px;max-height:75vh;"><span class="cmt">// SPDX-License-Identifier: MIT</span>
+<span class="kw">pragma</span> solidity <span class="num">0</span>.<span class="num">8</span>.<span class="num">24</span>;
+
+<span class="kw">import</span> &quot;@openzeppelin/contracts/token/ERC20/IERC20.sol&quot;;
+<span class="kw">import</span> &quot;@openzeppelin/contracts/access/AccessControl.sol&quot;;
+<span class="kw">import</span> &quot;@openzeppelin/contracts/utils/Pausable.sol&quot;;
+<span class="kw">import</span> &quot;@openzeppelin/contracts/utils/ReentrancyGuard.sol&quot;;
+<span class="kw">import</span> &quot;./GuardianRegistry.sol&quot;;
+
+<span class="cmt">/// @title ChildSavingsVault</span>
+<span class="cmt">/// @notice Holds each child&#x27;s FTC savings in a non-transferable, age-gated vault.</span>
+<span class="cmt">///</span>
+<span class="cmt">/// Design (per TOKENOMICS_SPEC.md + DECISIONS.md):</span>
+<span class="cmt">///   - Payout windows: ages <span class="num">5</span>, <span class="num">10</span>, <span class="num">15</span>, <span class="num">20</span>, <span class="num">25</span> (every <span class="num">5</span> years from birth).</span>
+<span class="cmt">///   - Max <span class="num">25</span>% of current balance per checkpoint.</span>
+<span class="cmt">///   - Yield <span class="kw">is</span> a floating protocol parameter (NOT a guarantee).</span>
+<span class="cmt">///   - Base deposit: $<span class="num">250</span> equivalent; treasury <span class="num">1</span>:<span class="num">1</span> match <span class="kw">for</span> qualifying low-income families.</span>
+<span class="cmt">///   - KYC required when cumulative withdrawals exceed $<span class="num">5</span>,<span class="num">000</span> (via GuardianRegistry).</span>
+<span class="kw">contract</span> ChildSavingsVault <span class="kw">is</span> AccessControl, Pausable, ReentrancyGuard {
+    <span class="cmt">// ────────────────────────── Roles ──────────────────────────</span>
+    <span class="kw">bytes32</span> <span class="kw">public</span> <span class="kw">constant</span> YIELD_SETTER_ROLE = keccak256(&quot;YIELD_SETTER_ROLE&quot;);
+    <span class="kw">bytes32</span> <span class="kw">public</span> <span class="kw">constant</span> MATCH_OPERATOR_ROLE = keccak256(&quot;MATCH_OPERATOR_ROLE&quot;);
+    <span class="kw">bytes32</span> <span class="kw">public</span> <span class="kw">constant</span> PAUSER_ROLE = keccak256(&quot;PAUSER_ROLE&quot;);
+
+    <span class="cmt">// ──────────────────────── Constants ────────────────────────</span>
+    <span class="cmt">/// @notice First payout age.</span>
+    <span class="kw">uint256</span> <span class="kw">public</span> <span class="kw">constant</span> PAYOUT_START_AGE = <span class="num">5</span>;
+    <span class="cmt">/// @notice Payout interval (every <span class="num">5</span> years).</span>
+    <span class="kw">uint256</span> <span class="kw">public</span> <span class="kw">constant</span> PAYOUT_INTERVAL = <span class="num">5</span>;
+    <span class="cmt">/// @notice Last payout age.</span>
+    <span class="kw">uint256</span> <span class="kw">public</span> <span class="kw">constant</span> PAYOUT_END_AGE = <span class="num">25</span>;
+    <span class="cmt">/// @notice Max % of balance withdrawable per checkpoint (<span class="num">25</span>% = <span class="num">2500</span> bps).</span>
+    <span class="kw">uint256</span> <span class="kw">public</span> <span class="kw">constant</span> MAX_PAYOUT_BPS = <span class="num">2500</span>;
+    <span class="cmt">/// @notice BPS denominator.</span>
+    <span class="kw">uint256</span> <span class="kw">public</span> <span class="kw">constant</span> BPS_DENOM = <span class="num">10000</span>;
+    <span class="cmt">/// @notice Seconds per year (approximate, <span class="kw">for</span> age calculation).</span>
+    <span class="kw">uint256</span> <span class="kw">public</span> <span class="kw">constant</span> SECONDS_PER_YEAR = <span class="num">365</span> days;
+
+    <span class="cmt">// ──────────────────────── Data Types ───────────────────────</span>
+    <span class="kw">struct</span> Account {
+        <span class="kw">address</span> guardian;          <span class="cmt">// parent/guardian wallet</span>
+        <span class="kw">bytes32</span> childIdHash;       <span class="cmt">// links to GuardianRegistry</span>
+        <span class="kw">uint256</span> birthTime;         <span class="cmt">// birth timestamp</span>
+        <span class="kw">uint256</span> principal;         <span class="cmt">// total deposited (parent + match)</span>
+        <span class="kw">uint256</span> balance;           <span class="cmt">// current balance including accrued yield</span>
+        <span class="kw">uint256</span> lastAccrualTime;   <span class="cmt">// last time yield was accrued</span>
+        <span class="kw">uint256</span> totalPayouts;      <span class="cmt">// cumulative amount withdrawn</span>
+        <span class="kw">uint256</span> lastPayoutAge;     <span class="cmt">// age at last payout (prevents double-withdraw per checkpoint)</span>
+        <span class="kw">bool</span>    active;
+    }
+
+    <span class="cmt">// ──────────────────────── State ────────────────────────────</span>
+    IERC20 <span class="kw">public</span> <span class="kw">immutable</span> ftcToken;
+    GuardianRegistry <span class="kw">public</span> <span class="kw">immutable</span> guardianRegistry;
+
+    <span class="kw">mapping</span>(<span class="kw">bytes32</span> =&gt; Account) <span class="kw">public</span> accounts;
+    <span class="kw">bytes32</span>[] <span class="kw">public</span> childAccounts;
+    <span class="kw">uint256</span> <span class="kw">public</span> totalChildren;
+    <span class="kw">uint256</span> <span class="kw">public</span> totalDeposited;
+    <span class="kw">uint256</span> <span class="kw">public</span> totalMatched;
+    <span class="kw">uint256</span> <span class="kw">public</span> totalPaidOut;
+
+    <span class="cmt">/// @notice Current annual yield rate in bps (e.g., <span class="num">1100</span> = <span class="num">11</span>%).</span>
+    <span class="cmt">///         Set by Treasury/governance. NOT a guarantee — floating parameter.</span>
+    <span class="kw">uint256</span> <span class="kw">public</span> yieldRateBps;
+
+    <span class="cmt">/// @notice Match cap per qualifying child (in FTC smallest units).</span>
+    <span class="kw">uint256</span> <span class="kw">public</span> matchCapPerChild;
+
+    <span class="cmt">/// @notice Child reserve token allocation (<span class="kw">for</span> matching deposits).</span>
+    <span class="kw">address</span> <span class="kw">public</span> childReserve;
+
+    <span class="cmt">// ────────────────────────── Events ─────────────────────────</span>
+    <span class="kw">event</span> AccountCreated(<span class="kw">bytes32</span> <span class="kw">indexed</span> childIdHash, <span class="kw">address</span> <span class="kw">indexed</span> guardian, <span class="kw">uint256</span> birthTime);
+    <span class="kw">event</span> Deposited(<span class="kw">bytes32</span> <span class="kw">indexed</span> childIdHash, <span class="kw">address</span> <span class="kw">indexed</span> depositor, <span class="kw">uint256</span> amount, <span class="kw">uint256</span> matchAmount);
+    <span class="kw">event</span> YieldAccrued(<span class="kw">bytes32</span> <span class="kw">indexed</span> childIdHash, <span class="kw">uint256</span> amount, <span class="kw">uint256</span> newBalance);
+    <span class="kw">event</span> Payout(<span class="kw">bytes32</span> <span class="kw">indexed</span> childIdHash, <span class="kw">address</span> <span class="kw">indexed</span> guardian, <span class="kw">uint256</span> amount, <span class="kw">uint256</span> childAge);
+    <span class="kw">event</span> YieldRateUpdated(<span class="kw">uint256</span> oldRate, <span class="kw">uint256</span> newRate);
+    <span class="kw">event</span> MatchCapUpdated(<span class="kw">uint256</span> oldCap, <span class="kw">uint256</span> newCap);
+
+    <span class="cmt">// ────────────────────────── Errors ─────────────────────────</span>
+    <span class="kw">error</span> AccountInactive();
+    <span class="kw">error</span> AccountAlreadyExists();
+    <span class="kw">error</span> GuardianNotVerified();
+    <span class="kw">error</span> AgeNotAttested();
+    <span class="kw">error</span> NotEligibleForPayout();
+    <span class="kw">error</span> ExceedsMaxPayout();
+    <span class="kw">error</span> AlreadyWithdrawnThisCheckpoint();
+    <span class="kw">error</span> TransferFailed();
+
+    <span class="cmt">// ───────────────────────── Constructor ─────────────────────</span>
+    <span class="kw">constructor</span>(
+        <span class="kw">address</span> _ftcToken,
+        <span class="kw">address</span> _guardianRegistry,
+        <span class="kw">address</span> _childReserve,
+        <span class="kw">uint256</span> _yieldRateBps,
+        <span class="kw">uint256</span> _matchCapPerChild
+    ) {
+        ftcToken = IERC20(_ftcToken);
+        guardianRegistry = GuardianRegistry(_guardianRegistry);
+        childReserve = _childReserve;
+        yieldRateBps = _yieldRateBps;
+        matchCapPerChild = _matchCapPerChild;
+
+        _grantRole(DEFAULT_ADMIN_ROLE, <span class="kw">msg</span>.sender);
+        _grantRole(PAUSER_ROLE, <span class="kw">msg</span>.sender);
+    }
+
+    <span class="cmt">// ───────────────────── Account Creation ────────────────────</span>
+    <span class="cmt">/// @notice Create a savings account <span class="kw">for</span> a child. The child must be</span>
+    <span class="cmt">///         registered in GuardianRegistry with age attested.</span>
+    <span class="kw">function</span> createAccount(<span class="kw">bytes32</span> childIdHash) <span class="kw">external</span> whenNotPaused nonReentrant {
+        <span class="kw">if</span> (accounts[childIdHash].active) <span class="kw">revert</span> AccountAlreadyExists();
+
+        <span class="cmt">// Verify guardian <span class="kw">is</span> registered and identity-verified</span>
+        <span class="kw">if</span> (!guardianRegistry.isGuardian(<span class="kw">msg</span>.sender)) <span class="kw">revert</span> GuardianNotVerified();
+        <span class="kw">if</span> (!guardianRegistry.isIdentityVerified(<span class="kw">msg</span>.sender)) <span class="kw">revert</span> GuardianNotVerified();
+        <span class="kw">if</span> (!guardianRegistry.isAgeAttested(childIdHash)) <span class="kw">revert</span> AgeNotAttested();
+
+        <span class="cmt">// Pull birth time from GuardianRegistry</span>
+        (, , <span class="kw">uint256</span> birthTime, , , ) = guardianRegistry.children(childIdHash);
+
+        accounts[childIdHash] = Account({
+            guardian: <span class="kw">msg</span>.sender,
+            childIdHash: childIdHash,
+            birthTime: birthTime,
+            principal: <span class="num">0</span>,
+            balance: <span class="num">0</span>,
+            lastAccrualTime: <span class="kw">block</span>.timestamp,
+            totalPayouts: <span class="num">0</span>,
+            lastPayoutAge: <span class="num">0</span>,
+            active: true
+        });
+
+        childAccounts.push(childIdHash);
+        totalChildren++;
+
+        emit AccountCreated(childIdHash, <span class="kw">msg</span>.sender, birthTime);
+    }
+
+    <span class="cmt">// ──────────────────────── Deposits ─────────────────────────</span>
+    <span class="cmt">/// @notice Deposit FTC into a child&#x27;s account.</span>
+    <span class="cmt">/// @param childIdHash The child&#x27;s identifier hash.</span>
+    <span class="cmt">/// @param amount Amount of FTC to deposit (in smallest units).</span>
+    <span class="cmt">/// @param qualifyForMatch Whether <span class="kw">this</span> family qualifies <span class="kw">for</span> the low-income match.</span>
+    <span class="kw">function</span> deposit(
+        <span class="kw">bytes32</span> childIdHash,
+        <span class="kw">uint256</span> amount,
+        <span class="kw">bool</span> qualifyForMatch
+    ) <span class="kw">external</span> whenNotPaused nonReentrant {
+        Account <span class="kw">storage</span> acct = accounts[childIdHash];
+        <span class="kw">if</span> (!acct.active) <span class="kw">revert</span> AccountInactive();
+
+        <span class="cmt">// Accrue yield before deposit</span>
+        _accrueYield(acct);
+
+        <span class="cmt">// Transfer tokens from depositor to vault</span>
+        <span class="kw">if</span> (!ftcToken.transferFrom(<span class="kw">msg</span>.sender, <span class="kw">address</span>(<span class="kw">this</span>), amount))
+            <span class="kw">revert</span> TransferFailed();
+
+        acct.principal += amount;
+        acct.balance += amount;
+        totalDeposited += amount;
+
+        <span class="cmt">// Treasury match <span class="kw">for</span> qualifying low-income families (<span class="num">1</span>:<span class="num">1</span> up to cap)</span>
+        <span class="kw">uint256</span> matchAmount = <span class="num">0</span>;
+        <span class="kw">if</span> (qualifyForMatch &amp;&amp; amount &lt;= matchCapPerChild) {
+            matchAmount = amount;
+            <span class="kw">if</span> (ftcToken.balanceOf(childReserve) &gt;= matchAmount) {
+                <span class="kw">if</span> (ftcToken.transferFrom(childReserve, <span class="kw">address</span>(<span class="kw">this</span>), matchAmount)) {
+                    acct.principal += matchAmount;
+                    acct.balance += matchAmount;
+                    totalMatched += matchAmount;
+                }
+            }
+        }
+
+        emit Deposited(childIdHash, <span class="kw">msg</span>.sender, amount, matchAmount);
+    }
+
+    <span class="cmt">// ──────────────────── Yield Accrual ────────────────────────</span>
+    <span class="cmt">/// @notice Accrue yield <span class="kw">for</span> a specific child account.</span>
+    <span class="kw">function</span> accrueYield(<span class="kw">bytes32</span> childIdHash) <span class="kw">external</span> whenNotPaused nonReentrant {
+        Account <span class="kw">storage</span> acct = accounts[childIdHash];
+        <span class="kw">if</span> (!acct.active) <span class="kw">revert</span> AccountInactive();
+        _accrueYield(acct);
+    }
+
+    <span class="kw">function</span> _accrueYield(Account <span class="kw">storage</span> acct) <span class="kw">internal</span> {
+        <span class="kw">if</span> (acct.balance == <span class="num">0</span> || yieldRateBps == <span class="num">0</span>) {
+            acct.lastAccrualTime = <span class="kw">block</span>.timestamp;
+            <span class="kw">return</span>;
+        }
+
+        <span class="kw">uint256</span> timeElapsed = <span class="kw">block</span>.timestamp - acct.lastAccrualTime;
+        <span class="kw">if</span> (timeElapsed == <span class="num">0</span>) <span class="kw">return</span>;
+
+        <span class="cmt">// Simple yield: balance * rate * timeElapsed / (<span class="num">1</span> year) / BPS_DENOM</span>
+        <span class="kw">uint256</span> accrued = (acct.balance * yieldRateBps * timeElapsed)
+            / (BPS_DENOM * SECONDS_PER_YEAR);
+
+        acct.balance += accrued;
+        acct.lastAccrualTime = <span class="kw">block</span>.timestamp;
+
+        emit YieldAccrued(acct.childIdHash, accrued, acct.balance);
+    }
+
+    <span class="cmt">// ──────────────────────── Payouts ──────────────────────────</span>
+    <span class="cmt">/// @notice Request a payout <span class="kw">for</span> a child. Only the guardian can call.</span>
+    <span class="cmt">///         Must be at a <span class="num">5</span>-year checkpoint (ages <span class="num">5</span>, <span class="num">10</span>, <span class="num">15</span>, <span class="num">20</span>, <span class="num">25</span>).</span>
+    <span class="cmt">///         Max <span class="num">25</span>% of current balance per checkpoint.</span>
+    <span class="kw">function</span> requestPayout(<span class="kw">bytes32</span> childIdHash, <span class="kw">uint256</span> amount)
+        <span class="kw">external</span>
+        whenNotPaused
+        nonReentrant
+    {
+        Account <span class="kw">storage</span> acct = accounts[childIdHash];
+        <span class="kw">if</span> (!acct.active) <span class="kw">revert</span> AccountInactive();
+        <span class="kw">if</span> (acct.guardian != <span class="kw">msg</span>.sender) <span class="kw">revert</span> GuardianNotVerified();
+
+        <span class="cmt">// Check age eligibility</span>
+        <span class="kw">uint256</span> childAge = _getAge(acct);
+        <span class="kw">if</span> (!_isPayoutEligible(childAge)) <span class="kw">revert</span> NotEligibleForPayout();
+        <span class="kw">if</span> (acct.lastPayoutAge == childAge) <span class="kw">revert</span> AlreadyWithdrawnThisCheckpoint();
+
+        <span class="cmt">// Accrue yield before payout</span>
+        _accrueYield(acct);
+
+        <span class="cmt">// Check max payout (<span class="num">25</span>% of balance)</span>
+        <span class="kw">uint256</span> maxPayout = (acct.balance * MAX_PAYOUT_BPS) / BPS_DENOM;
+        <span class="kw">if</span> (amount &gt; maxPayout) <span class="kw">revert</span> ExceedsMaxPayout();
+        <span class="kw">if</span> (amount == <span class="num">0</span> || amount &gt; acct.balance) <span class="kw">revert</span> NotEligibleForPayout();
+
+        <span class="cmt">// KYC check via GuardianRegistry</span>
+        <span class="cmt">// This reverts <span class="kw">if</span> KYC <span class="kw">is</span> required but not yet attested</span>
+        guardianRegistry.recordWithdrawal(childIdHash, amount);
+
+        <span class="cmt">// Transfer to guardian</span>
+        acct.balance -= amount;
+        acct.totalPayouts += amount;
+        acct.lastPayoutAge = childAge;
+        totalPaidOut += amount;
+
+        <span class="kw">if</span> (!ftcToken.transfer(<span class="kw">msg</span>.sender, amount))
+            <span class="kw">revert</span> TransferFailed();
+
+        emit Payout(childIdHash, <span class="kw">msg</span>.sender, amount, childAge);
+    }
+
+    <span class="cmt">// ──────────────────────── Views ────────────────────────────</span>
+    <span class="cmt">/// @notice Get the current age of a child in years.</span>
+    <span class="kw">function</span> _getAge(Account <span class="kw">storage</span> acct) <span class="kw">internal</span> <span class="kw">view</span> <span class="kw">returns</span> (<span class="kw">uint256</span>) {
+        <span class="kw">if</span> (<span class="kw">block</span>.timestamp &lt; acct.birthTime) <span class="kw">return</span> <span class="num">0</span>;
+        <span class="kw">return</span> (<span class="kw">block</span>.timestamp - acct.birthTime) / SECONDS_PER_YEAR;
+    }
+
+    <span class="cmt">/// @notice Check <span class="kw">if</span> a child <span class="kw">is</span> eligible <span class="kw">for</span> a payout at their current age.</span>
+    <span class="kw">function</span> _isPayoutEligible(<span class="kw">uint256</span> age) <span class="kw">internal</span> <span class="kw">pure</span> <span class="kw">returns</span> (<span class="kw">bool</span>) {
+        <span class="kw">if</span> (age &lt; PAYOUT_START_AGE || age &gt; PAYOUT_END_AGE) <span class="kw">return</span> false;
+        <span class="kw">return</span> (age % PAYOUT_INTERVAL) == <span class="num">0</span>;
+    }
+
+    <span class="cmt">/// @notice Public helper: <span class="kw">is</span> <span class="kw">this</span> child currently at a payout checkpoint?</span>
+    <span class="kw">function</span> isPayoutEligible(<span class="kw">bytes32</span> childIdHash) <span class="kw">external</span> <span class="kw">view</span> <span class="kw">returns</span> (<span class="kw">bool</span>) {
+        Account <span class="kw">storage</span> acct = accounts[childIdHash];
+        <span class="kw">if</span> (!acct.active) <span class="kw">return</span> false;
+        <span class="kw">uint256</span> age = _getAge(acct);
+        <span class="kw">return</span> _isPayoutEligible(age);
+    }
+
+    <span class="cmt">/// @notice Get full account details.</span>
+    <span class="kw">function</span> getAccount(<span class="kw">bytes32</span> childIdHash) <span class="kw">external</span> <span class="kw">view</span> <span class="kw">returns</span> (
+        <span class="kw">address</span> guardian,
+        <span class="kw">uint256</span> birthTime,
+        <span class="kw">uint256</span> principal,
+        <span class="kw">uint256</span> balance,
+        <span class="kw">uint256</span> totalPayouts,
+        <span class="kw">uint256</span> lastPayoutAge,
+        <span class="kw">bool</span> active
+    ) {
+        Account <span class="kw">storage</span> acct = accounts[childIdHash];
+        <span class="kw">return</span> (
+            acct.guardian,
+            acct.birthTime,
+            acct.principal,
+            acct.balance,
+            acct.totalPayouts,
+            acct.lastPayoutAge,
+            acct.active
+        );
+    }
+
+    <span class="cmt">/// @notice Max withdrawable amount at current checkpoint.</span>
+    <span class="kw">function</span> maxPayout(<span class="kw">bytes32</span> childIdHash) <span class="kw">external</span> <span class="kw">view</span> <span class="kw">returns</span> (<span class="kw">uint256</span>) {
+        Account <span class="kw">storage</span> acct = accounts[childIdHash];
+        <span class="kw">return</span> (acct.balance * MAX_PAYOUT_BPS) / BPS_DENOM;
+    }
+
+    <span class="kw">function</span> getChildAge(<span class="kw">bytes32</span> childIdHash) <span class="kw">external</span> <span class="kw">view</span> <span class="kw">returns</span> (<span class="kw">uint256</span>) {
+        Account <span class="kw">storage</span> acct = accounts[childIdHash];
+        <span class="kw">return</span> _getAge(acct);
+    }
+
+    <span class="cmt">// ──────────────────── Admin / Governance ───────────────────</span>
+    <span class="cmt">/// @notice Set the floating yield rate (YIELD_SETTER_ROLE / Treasury).</span>
+    <span class="kw">function</span> setYieldRate(<span class="kw">uint256</span> newRateBps) <span class="kw">external</span> onlyRole(YIELD_SETTER_ROLE) {
+        emit YieldRateUpdated(yieldRateBps, newRateBps);
+        yieldRateBps = newRateBps;
+    }
+
+    <span class="cmt">/// @notice Set the match cap per qualifying child (MATCH_OPERATOR_ROLE).</span>
+    <span class="kw">function</span> setMatchCap(<span class="kw">uint256</span> newCap) <span class="kw">external</span> onlyRole(MATCH_OPERATOR_ROLE) {
+        emit MatchCapUpdated(matchCapPerChild, newCap);
+        matchCapPerChild = newCap;
+    }
+
+    <span class="kw">function</span> pause() <span class="kw">external</span> onlyRole(PAUSER_ROLE) {
+        _pause();
+    }
+
+    <span class="kw">function</span> unpause() <span class="kw">external</span> onlyRole(PAUSER_ROLE) {
+        _unpause();
+    }
+}</div>
+      </div>
+    </div>
+    
+    <div class="view" id="view-abi">
+      <div class="view-header">
+        <h2>ABI Reference</h2>
+        <p>Full function, event, and error signatures for all 3 contracts.</p>
+      </div>
+      <div class="tabs">
+<div class="tab active" data-abi="ftc">FTC</div>
+<div class="tab" data-abi="guardian">GuardianRegistry</div>
+<div class="tab" data-abi="vault">ChildSavingsVault</div>
+      </div>
+      <div class="abi-panel active" id="abi-ftc"><div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">BURNER_ROLE</span><span class="fn-args">()</span> <span class="muted">→ bytes32</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">DEFAULT_ADMIN_ROLE</span><span class="fn-args">()</span> <span class="muted">→ bytes32</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">MAX_SUPPLY</span><span class="fn-args">()</span> <span class="muted">→ uint256</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">PAUSER_ROLE</span><span class="fn-args">()</span> <span class="muted">→ bytes32</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">allowance</span><span class="fn-args">(address owner, address spender)</span> <span class="muted">→ uint256</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">approve</span><span class="fn-args">(address spender, uint256 value)</span> <span class="muted">→ bool</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">balanceOf</span><span class="fn-args">(address account)</span> <span class="muted">→ uint256</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">burn</span><span class="fn-args">(uint256 amount)</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">burnFrom</span><span class="fn-args">(address account, uint256 amount)</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">decimals</span><span class="fn-args">()</span> <span class="muted">→ uint8</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">getRoleAdmin</span><span class="fn-args">(bytes32 role)</span> <span class="muted">→ bytes32</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">grantRole</span><span class="fn-args">(bytes32 role, address account)</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">hasRole</span><span class="fn-args">(bytes32 role, address account)</span> <span class="muted">→ bool</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">name</span><span class="fn-args">()</span> <span class="muted">→ string</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">pause</span><span class="fn-args">()</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">paused</span><span class="fn-args">()</span> <span class="muted">→ bool</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">renounceRole</span><span class="fn-args">(bytes32 role, address callerConfirmation)</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">revokeRole</span><span class="fn-args">(bytes32 role, address account)</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">supportsInterface</span><span class="fn-args">(bytes4 interfaceId)</span> <span class="muted">→ bool</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">symbol</span><span class="fn-args">()</span> <span class="muted">→ string</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">totalSupply</span><span class="fn-args">()</span> <span class="muted">→ uint256</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">transfer</span><span class="fn-args">(address to, uint256 value)</span> <span class="muted">→ bool</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">transferFrom</span><span class="fn-args">(address from, address to, uint256 value)</span> <span class="muted">→ bool</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">unpause</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">Approval</span><span class="fn-args">(address owner, address spender, uint256 value)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">Burn</span><span class="fn-args">(address burner, uint256 amount)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">GenesisAllocation</span><span class="fn-args">(address treasury, address publicSale, address liquidity, address team, address investors, address community, address childReserve)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">Paused</span><span class="fn-args">(address account)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">RoleAdminChanged</span><span class="fn-args">(bytes32 role, bytes32 previousAdminRole, bytes32 newAdminRole)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">RoleGranted</span><span class="fn-args">(bytes32 role, address account, address sender)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">RoleRevoked</span><span class="fn-args">(bytes32 role, address account, address sender)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">Transfer</span><span class="fn-args">(address from, address to, uint256 value)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">Unpaused</span><span class="fn-args">(address account)</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">AccessControlBadConfirmation</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">AccessControlUnauthorizedAccount</span><span class="fn-args">(address account, bytes32 neededRole)</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">ERC20InsufficientAllowance</span><span class="fn-args">(address spender, uint256 allowance, uint256 needed)</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">ERC20InsufficientBalance</span><span class="fn-args">(address sender, uint256 balance, uint256 needed)</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">ERC20InvalidApprover</span><span class="fn-args">(address approver)</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">ERC20InvalidReceiver</span><span class="fn-args">(address receiver)</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">ERC20InvalidSender</span><span class="fn-args">(address sender)</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">ERC20InvalidSpender</span><span class="fn-args">(address spender)</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">EnforcedPause</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">ExpectedPause</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">ZeroAddress</span><span class="fn-args">()</span></div>
+</div>
+      <div class="abi-panel" id="abi-guardian" style="display:none;"><div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">AGE_ATTESTOR_ROLE</span><span class="fn-args">()</span> <span class="muted">→ bytes32</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">DEFAULT_ADMIN_ROLE</span><span class="fn-args">()</span> <span class="muted">→ bytes32</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">KYC_ISSUER_ROLE</span><span class="fn-args">()</span> <span class="muted">→ bytes32</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">PAUSER_ROLE</span><span class="fn-args">()</span> <span class="muted">→ bytes32</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">attestAge</span><span class="fn-args">(bytes32 childIdHash)</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">attestKYC</span><span class="fn-args">(bytes32 childIdHash)</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">children</span><span class="fn-args">(bytes32 )</span> <span class="muted">→ bytes32, address, uint256, bool, bool, uint256</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">getChildGuardian</span><span class="fn-args">(bytes32 childIdHash)</span> <span class="muted">→ address</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">getGuardianChildren</span><span class="fn-args">(address guardian)</span> <span class="muted">→ bytes32[]</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">getRoleAdmin</span><span class="fn-args">(bytes32 role)</span> <span class="muted">→ bytes32</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">grantRole</span><span class="fn-args">(bytes32 role, address account)</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">guardianHasChild</span><span class="fn-args">(address , bytes32 )</span> <span class="muted">→ bool</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">guardians</span><span class="fn-args">(address )</span> <span class="muted">→ address, bool, bool, uint256</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">hasRole</span><span class="fn-args">(bytes32 role, address account)</span> <span class="muted">→ bool</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">isAgeAttested</span><span class="fn-args">(bytes32 childIdHash)</span> <span class="muted">→ bool</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">isGuardian</span><span class="fn-args">(address guardian)</span> <span class="muted">→ bool</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">isIdentityVerified</span><span class="fn-args">(address guardian)</span> <span class="muted">→ bool</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">isKYCVerified</span><span class="fn-args">(bytes32 childIdHash)</span> <span class="muted">→ bool</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">kycThreshold</span><span class="fn-args">()</span> <span class="muted">→ uint256</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">pause</span><span class="fn-args">()</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">paused</span><span class="fn-args">()</span> <span class="muted">→ bool</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">recordWithdrawal</span><span class="fn-args">(bytes32 childIdHash, uint256 amount)</span> <span class="muted">→ bool</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">registerChild</span><span class="fn-args">(bytes32 childIdHash, uint256 birthTimestamp)</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">registerGuardian</span><span class="fn-args">(address guardian, bool identityVerified)</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">renounceRole</span><span class="fn-args">(bytes32 role, address callerConfirmation)</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">revokeRole</span><span class="fn-args">(bytes32 role, address account)</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">setKycThreshold</span><span class="fn-args">(uint256 newThreshold)</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">supportsInterface</span><span class="fn-args">(bytes4 interfaceId)</span> <span class="muted">→ bool</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">unpause</span><span class="fn-args">()</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">wouldRequireKYC</span><span class="fn-args">(bytes32 childIdHash, uint256 amount)</span> <span class="muted">→ bool</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">AgeAttested</span><span class="fn-args">(bytes32 childIdHash, address attestor)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">ChildRegistered</span><span class="fn-args">(bytes32 childIdHash, address guardian, uint256 birthTimestamp)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">GuardianRegistered</span><span class="fn-args">(address guardian, bool identityVerified)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">KYCAttested</span><span class="fn-args">(bytes32 childIdHash, address issuer)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">KYCThresholdUpdated</span><span class="fn-args">(uint256 oldThreshold, uint256 newThreshold)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">Paused</span><span class="fn-args">(address account)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">RoleAdminChanged</span><span class="fn-args">(bytes32 role, bytes32 previousAdminRole, bytes32 newAdminRole)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">RoleGranted</span><span class="fn-args">(bytes32 role, address account, address sender)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">RoleRevoked</span><span class="fn-args">(bytes32 role, address account, address sender)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">Unpaused</span><span class="fn-args">(address account)</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">AccessControlBadConfirmation</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">AccessControlUnauthorizedAccount</span><span class="fn-args">(address account, bytes32 neededRole)</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">AgeNotAttested</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">ChildAlreadyExists</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">ChildNotFound</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">EnforcedPause</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">ExpectedPause</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">GuardianIdentityNotVerified</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">GuardianNotRegistered</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">KYCRequired</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">NotAuthorizedForChild</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">ReentrancyGuardReentrantCall</span><span class="fn-args">()</span></div>
+</div>
+      <div class="abi-panel" id="abi-vault" style="display:none;"><div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">BPS_DENOM</span><span class="fn-args">()</span> <span class="muted">→ uint256</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">DEFAULT_ADMIN_ROLE</span><span class="fn-args">()</span> <span class="muted">→ bytes32</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">MATCH_OPERATOR_ROLE</span><span class="fn-args">()</span> <span class="muted">→ bytes32</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">MAX_PAYOUT_BPS</span><span class="fn-args">()</span> <span class="muted">→ uint256</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">PAUSER_ROLE</span><span class="fn-args">()</span> <span class="muted">→ bytes32</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">PAYOUT_END_AGE</span><span class="fn-args">()</span> <span class="muted">→ uint256</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">PAYOUT_INTERVAL</span><span class="fn-args">()</span> <span class="muted">→ uint256</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">PAYOUT_START_AGE</span><span class="fn-args">()</span> <span class="muted">→ uint256</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">SECONDS_PER_YEAR</span><span class="fn-args">()</span> <span class="muted">→ uint256</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">YIELD_SETTER_ROLE</span><span class="fn-args">()</span> <span class="muted">→ bytes32</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">accounts</span><span class="fn-args">(bytes32 )</span> <span class="muted">→ address, bytes32, uint256, uint256, uint256, uint256, uint256, uint256, bool</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">accrueYield</span><span class="fn-args">(bytes32 childIdHash)</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">childAccounts</span><span class="fn-args">(uint256 )</span> <span class="muted">→ bytes32</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">childReserve</span><span class="fn-args">()</span> <span class="muted">→ address</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">createAccount</span><span class="fn-args">(bytes32 childIdHash)</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">deposit</span><span class="fn-args">(bytes32 childIdHash, uint256 amount, bool qualifyForMatch)</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">ftcToken</span><span class="fn-args">()</span> <span class="muted">→ address</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">getAccount</span><span class="fn-args">(bytes32 childIdHash)</span> <span class="muted">→ address, uint256, uint256, uint256, uint256, uint256, bool</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">getChildAge</span><span class="fn-args">(bytes32 childIdHash)</span> <span class="muted">→ uint256</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">getRoleAdmin</span><span class="fn-args">(bytes32 role)</span> <span class="muted">→ bytes32</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">grantRole</span><span class="fn-args">(bytes32 role, address account)</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">guardianRegistry</span><span class="fn-args">()</span> <span class="muted">→ address</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">hasRole</span><span class="fn-args">(bytes32 role, address account)</span> <span class="muted">→ bool</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">isPayoutEligible</span><span class="fn-args">(bytes32 childIdHash)</span> <span class="muted">→ bool</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">matchCapPerChild</span><span class="fn-args">()</span> <span class="muted">→ uint256</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">maxPayout</span><span class="fn-args">(bytes32 childIdHash)</span> <span class="muted">→ uint256</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">pause</span><span class="fn-args">()</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">paused</span><span class="fn-args">()</span> <span class="muted">→ bool</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">renounceRole</span><span class="fn-args">(bytes32 role, address callerConfirmation)</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">requestPayout</span><span class="fn-args">(bytes32 childIdHash, uint256 amount)</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">revokeRole</span><span class="fn-args">(bytes32 role, address account)</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">setMatchCap</span><span class="fn-args">(uint256 newCap)</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">setYieldRate</span><span class="fn-args">(uint256 newRateBps)</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">supportsInterface</span><span class="fn-args">(bytes4 interfaceId)</span> <span class="muted">→ bool</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">totalChildren</span><span class="fn-args">()</span> <span class="muted">→ uint256</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">totalDeposited</span><span class="fn-args">()</span> <span class="muted">→ uint256</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">totalMatched</span><span class="fn-args">()</span> <span class="muted">→ uint256</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">totalPaidOut</span><span class="fn-args">()</span> <span class="muted">→ uint256</span></div>
+<div class="abi-func"><span class="fn-type">nonpayable</span> <span class="fn-name">unpause</span><span class="fn-args">()</span></div>
+<div class="abi-func"><span class="fn-type">view</span> <span class="fn-name">yieldRateBps</span><span class="fn-args">()</span> <span class="muted">→ uint256</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">AccountCreated</span><span class="fn-args">(bytes32 childIdHash, address guardian, uint256 birthTime)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">Deposited</span><span class="fn-args">(bytes32 childIdHash, address depositor, uint256 amount, uint256 matchAmount)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">MatchCapUpdated</span><span class="fn-args">(uint256 oldCap, uint256 newCap)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">Paused</span><span class="fn-args">(address account)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">Payout</span><span class="fn-args">(bytes32 childIdHash, address guardian, uint256 amount, uint256 childAge)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">RoleAdminChanged</span><span class="fn-args">(bytes32 role, bytes32 previousAdminRole, bytes32 newAdminRole)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">RoleGranted</span><span class="fn-args">(bytes32 role, address account, address sender)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">RoleRevoked</span><span class="fn-args">(bytes32 role, address account, address sender)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">Unpaused</span><span class="fn-args">(address account)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">YieldAccrued</span><span class="fn-args">(bytes32 childIdHash, uint256 amount, uint256 newBalance)</span></div>
+<div class="abi-func abi-event"><span class="fn-type">event</span> <span class="fn-name">YieldRateUpdated</span><span class="fn-args">(uint256 oldRate, uint256 newRate)</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">AccessControlBadConfirmation</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">AccessControlUnauthorizedAccount</span><span class="fn-args">(address account, bytes32 neededRole)</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">AccountAlreadyExists</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">AccountInactive</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">AgeNotAttested</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">AlreadyWithdrawnThisCheckpoint</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">EnforcedPause</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">ExceedsMaxPayout</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">ExpectedPause</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">GuardianNotVerified</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">NotEligibleForPayout</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">ReentrancyGuardReentrantCall</span><span class="fn-args">()</span></div>
+<div class="abi-func abi-error"><span class="fn-type">error</span> <span class="fn-name">TransferFailed</span><span class="fn-args">()</span></div>
+</div>
+    </div>
+
+    <div class="view" id="view-doc-architecture">
+      <div class="view-header">
+        <h2>Architecture</h2>
+        <p>Smart contract architecture and design philosophy.</p>
+      </div>
+      <div class="card">
+        <div class="doc-content"><h1>FTC Smart Contract Architecture</h1>
+<br>
+<p><strong>Version:</strong> 0.1</p>
+<p><strong>Target Network:</strong> EVM-compatible L2 (Base / Arbitrum / Optimism recommended)</p>
+<p><strong>Language:</strong> Solidity 0.8.x</p>
+<p><strong>Tooling:</strong> Foundry + Hardhat, OpenZeppelin Contracts, Chainlink Price Feeds</p>
+<br>
+<hr>
+<br>
+<h2>1. Design Philosophy</h2>
+<br>
+<li>**Minimal on-chain state:** Keep child-account ledgers and payout rules on-chain; heavy metadata (KYC attestations, store inventory) off-chain.</li>
+<li>**Upgrade-governed:** Core contracts use UUPS proxy pattern with a multisig + timelock; later transition to on-chain DAO.</li>
+<li>**Compliance-aware:** Parent accounts may be pseudonymous, but withdrawal above thresholds requires KYC/AML attestation from an authorized oracle/issuer.</li>
+<li>**No guaranteed yield:** Yield is a function of observable treasury returns and fee revenue, not a contractual debt.</li>
+<br>
+<hr>
+<br>
+<h2>2. Contract Map</h2>
+<br>
+<div style="background:#0d1117;border-radius:8px;padding:16px;overflow-x:auto;font-family:var(--mono);font-size:12px;margin:8px 0;">
+┌─────────────────────────────────────────────────────────────┐
+│                     FTCToken (ERC-20)                       │
+│  - Mintable only at genesis; no new mint after deployment   │
+│  - Burn mechanism via Treasury fee buyback                  │
+└───────────────┬─────────────────────────────┬───────────────┘
+                │                             │
+    ┌───────────▼──────────┐      ┌───────────▼──────────┐
+    │  ChildSavingsVault   │      │      Treasury        │
+    │ - per-child account  │      │ - yield strategies   │
+    │ - age / payout rules │      │ - store subsidies    │
+    │ - parent guardian    │      │ - fee distribution   │
+    └───────────┬──────────┘      └───────────┬──────────┘
+                │                             │
+    ┌───────────▼──────────┐      ┌───────────▼──────────┐
+    │  GuardianRegistry    │      │   StoreDiscount      │
+    │ - parent ↔ child     │      │ - merchant registry  │
+    │ - KYC/age oracle     │      │ - discount logic     │
+    └──────────────────────┘      └───────────┬──────────┘
+                                              │
+                              ┌───────────────▼───────────────┐
+                              │        FeeDispatcher         │
+                              │ - splits merchant fees       │
+                              │   to burn, treasury, rewards │
+                              └───────────────────────────────┘
+</div>
+<br>
+<hr>
+<br>
+<h2>3. Core Contracts</h2>
+<br>
+<h3>3.1 `FTC.sol` — The ERC-20 Token</h3>
+<br>
+<li>`maxSupply` = 21,000,000,000 FTC minted at genesis.</li>
+<li>No future minting.</li>
+<li>`burn(uint256 amount)` callable only by Treasury or FeeDispatcher.</li>
+<li>Events: `Burn`, `TreasuryTransfer`.</li>
+<br>
+<div style="background:#0d1117;border-radius:8px;padding:16px;overflow-x:auto;font-family:var(--mono);font-size:12px;margin:8px 0;">
+contract FTC is ERC20, ERC20Burnable, AccessControl {
+    bytes32 public constant BURNER_ROLE = keccak256(&quot;BURNER_ROLE&quot;);
+    uint256 public constant MAX_SUPPLY = 21_000_000_000 * 1e18;
+
+    constructor(address treasury, address publicSale, address liquidity, address team, address investors, address community, address childReserve)
+        ERC20(&quot;For The Children&quot;, &quot;FTC&quot;)
+    {
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(BURNER_ROLE, treasury);
+        // mint allocations to distribution addresses
+    }
+}
+</div>
+<br>
+<h3>3.2 `ChildSavingsVault.sol`</h3>
+<br>
+<p>Holds each child’s savings in a non-transferable, age-gated vault.</p>
+<br>
+<p><strong>Data structure:</strong></p>
+<div style="background:#0d1117;border-radius:8px;padding:16px;overflow-x:auto;font-family:var(--mono);font-size:12px;margin:8px 0;">
+struct Account {
+    address parent;
+    bytes32 childIdHash;   // privacy-preserving child identifier
+    uint256 birthTime;
+    uint256 principal;
+    uint256 balance;
+    uint256 lastAccrualTime;
+    uint256 totalPayouts;
+    bool    kycVerified;
+}
+mapping(bytes32 =&gt; Account) public accounts;
+</div>
+<br>
+<p><strong>Key functions:</strong></p>
+<li>`createAccount(bytes32 childIdHash, uint256 birthTime)` — callable by a registered guardian.</li>
+<li>`deposit(bytes32 childIdHash, uint256 amount)` — parent deposits FTC; protocol may match from `childReserve`.</li>
+<li>`accrueYield(bytes32 childIdHash)` — updates balance based on current `yieldRate` from Treasury.</li>
+<li>`requestPayout(bytes32 childIdHash, uint256 amount)` — allowed only if:</li>
+<p>  - child age &gt;= 5 and multiple of 5 years,</p>
+<p>  - amount &lt;= 25% of current balance per checkpoint,</p>
+<p>  - KYC attestation present for threshold withdrawals.</p>
+<li>`setYieldRate(uint256 newRate)` — Treasury/DAO only, capped to prevent guarantee-like behavior.</li>
+<br>
+<p><strong>Payout schedule logic:</strong></p>
+<div style="background:#0d1117;border-radius:8px;padding:16px;overflow-x:auto;font-family:var(--mono);font-size:12px;margin:8px 0;">
+function isPayoutEligible(bytes32 childIdHash) public view returns (bool) {
+    uint256 age = (block.timestamp - accounts[childIdHash].birthTime) / 365 days;
+    return age &gt;= 5 &amp;&amp; age &lt;= 25 &amp;&amp; (age % 5) == 0;
+}
+</div>
+<br>
+<h3>3.3 `Treasury.sol`</h3>
+<br>
+<p>Custodies protocol-owned assets and deploys capital into low-risk yield strategies (e.g., liquid staking tokens, money-market funds tokenized as ERC-4626).</p>
+<br>
+<li>Holds FTC and stablecoins.</li>
+<li>`invest(address strategy, uint256 amount)` — into whitelisted ERC-4626 vaults.</li>
+<li>`harvest()` — collects yield and sends a portion to `ChildSavingsVault` to fund `yieldRate`.</li>
+<li>`fundStoreSubsidy(address store, uint256 amount)` — transfers FTC or stablecoins for consumer discount rebates.</li>
+<li>`buybackAndBurn(uint256 ftcAmount)` — market-buys FTC (via DEX router) and burns it.</li>
+<br>
+<h3>3.4 `StoreDiscount.sol`</h3>
+<br>
+<p>Manages merchant participation and consumer discount authorization.</p>
+<br>
+<div style="background:#0d1117;border-radius:8px;padding:16px;overflow-x:auto;font-family:var(--mono);font-size:12px;margin:8px 0;">
+struct Merchant {
+    bool    registered;
+    uint256 maxDiscountBps;   // e.g., 3000 = 30%
+    uint256 monthlyRebateCap; // in USD-equivalent
+    uint256 accruedRebate;
+}
+mapping(address =&gt; Merchant) public merchants;
+</div>
+<br>
+<li>`registerMerchant(address store, uint256 maxDiscountBps, uint256 rebateCap)` — governance.</li>
+<li>`processPayment(address buyer, uint256 grossAmount, address merchant)` — applies discount at point of sale, merchant later claims rebate from Treasury.</li>
+<li>Integrates Chainlink FTC/USD and product-basket oracles where available.</li>
+<br>
+<h3>3.5 `FeeDispatcher.sol`</h3>
+<br>
+<p>Receives merchant transaction fees (in stablecoins or FTC) and routes them:</p>
+<li>25% → buyback &amp; burn,</li>
+<li>35% → Treasury → ChildSavingsVault yield reserve,</li>
+<li>30% → store operations fund,</li>
+<li>10% → liquidity incentives / market makers.</li>
+<br>
+<p>Percentages are governance-adjustable within caps.</p>
+<br>
+<h3>3.6 `GuardianRegistry.sol`</h3>
+<br>
+<p>Maps parents/guardians to child accounts and manages age/KYC attestations.</p>
+<br>
+<li>`registerGuardian(address guardian, bytes32 childIdHash)`.</li>
+<li>`attestKYC(bytes32 childIdHash, bytes proof)` — authorized issuer only.</li>
+<li>`attestAge(bytes32 childIdHash, uint256 birthTimestamp)` — authorized issuer or parent with documentation.</li>
+<br>
+<hr>
+<br>
+<h2>4. Security Patterns</h2>
+<br>
+<li>**Re-entrancy:** Use `ReentrancyGuard` on all payout and merchant-claim functions.</li>
+<li>**Access control:** `AccessControl` with role separation (GUARDIAN, TREASURY_MANAGER, MERCHANT_REGISTRAR, KYC_ISSUER).</li>
+<li>**Timelock:** All Treasury moves and parameter changes go through a 48-hour timelock.</li>
+<li>**Pausing:** `Pausable` on deposits and payouts for emergency response.</li>
+<li>**Oracle failure:** Chainlink stale-price checks; fallback to TWAP if primary oracle fails.</li>
+<br>
+<hr>
+<br>
+<h2>5. Open Questions</h2>
+<br>
+<li>KYC: on-chain ZK attestation vs. off-chain identity provider?</li>
+<li>Store integration: direct merchant smart-contract plugin vs. centralized POS API?</li>
+<li>Cross-chain: remain single-L2 or bridge to other EVM chains? Recommend single-L2 for MVP.</li>
+<br></div>
+      </div>
+    </div>
+    
+    <div class="view" id="view-doc-charter">
+      <div class="view-header">
+        <h2>Project Charter</h2>
+        <p>Mission, scope, and objectives.</p>
+      </div>
+      <div class="card">
+        <div class="doc-content"><h1>FTC (For The Children) — Project Charter</h1>
+<br>
+<p><strong>Version:</strong> 0.1</p>
+<p><strong>Date:</strong> 2026-07-17</p>
+<p><strong>Lead:</strong> Kai 👑</p>
+<p><strong>Owner:</strong> John William Vincent (Mr. Vincent)</p>
+<br>
+<hr>
+<br>
+<h2>1. Purpose</h2>
+<p>Build a serious, utility-first, decentralized cryptocurrency and smart-contract ecosystem that lets parents/guardians create long-term, compounding wealth accounts for children. The protocol combines voluntary savings, transparent yield mechanics, timed payouts, and a real-world retail discount network (FTC Stores) to reduce generational poverty.</p>
+<br>
+<h2>2. North Star Principles</h2>
+<li>**Utility over hype:** Every token feature must map to a real family benefit.</li>
+<li>**Compliance-first:** Treat U.S. and global securities/commodities law as a design constraint, not an afterthought.</li>
+<li>**Sustainability over guarantees:** Yield and discounts are funded by measurable protocol cash flows (fees, store margins, treasury returns), not by later investors.</li>
+<li>**Open and auditable:** All core logic is on-chain, open-source, and upgrade-governed.</li>
+<br>
+<h2>3. Status</h2>
+<p>Moving from concept → structured design.</p>
+<br>
+<h2>4. Deliverables in this Phase</h2>
+<li>v1 tokenomics design and simulation</li>
+<li>Smart-contract architecture (EVM-compatible)</li>
+<li>Implementation roadmap with legal/audit gates</li>
+<li>Economic-outcome simulations (base, bull, bear, adverse)</li>
+<li>Executive summary / whitepaper section</li>
+<li>Risk register with mitigations</li>
+<br>
+<h2>5. Open Decisions for Mr. Vincent</h2>
+<p>(See <code>docs/DECISION_LOG.md</code>)</p>
+<br>
+<h2>6. Repository Layout</h2>
+<div style="background:#0d1117;border-radius:8px;padding:16px;overflow-x:auto;font-family:var(--mono);font-size:12px;margin:8px 0;">
+~/ftc/
+  contracts/    Solidity contracts and interfaces
+  docs/           Whitepaper, charter, decision log, risk register
+  legal/          Compliance memos, securities-law considerations
+  models/         Python economic simulations
+  roadmap/        Milestone plans and testnet specs
+</div>
+<br></div>
+      </div>
+    </div>
+    
+    <div class="view" id="view-doc-executive">
+      <div class="view-header">
+        <h2>Executive Summary</h2>
+        <p>High-level project overview for stakeholders.</p>
+      </div>
+      <div class="card">
+        <div class="doc-content"><h1>FTC Executive Summary</h1>
+<br>
+<p><strong>Project:</strong> FTC — For The Children  </p>
+<p><strong>Version:</strong> 0.1  </p>
+<p><strong>Date:</strong> 2026-07-17  </p>
+<p><strong>Prepared by:</strong> Kai, for John William Vincent</p>
+<br>
+<hr>
+<br>
+<h2>1. What is FTC?</h2>
+<br>
+<p>FTC is a decentralized savings and payments protocol designed to help parents and guardians build long-term, compounding wealth for children. It combines:</p>
+<br>
+<li>**Child savings vaults** with age-gated, structured payouts every five years until age 25.</li>
+<li>**Transparent yield** funded by protocol treasury returns and ecosystem fees, not by later investors.</li>
+<li>**FTC Stores** — a retail discount network where families pay with FTC for meaningful savings on everyday essentials.</li>
+<br>
+<p>The mission is to create family-level abundance, reduce dependence on fragile public systems, and end generational poverty through voluntary, incentive-aligned financial tools.</p>
+<br>
+<hr>
+<br>
+<h2>2. The Problem</h2>
+<br>
+<li>Public pension and child-support systems in many countries are underfunded and politically uncertain.</li>
+<li>Traditional child savings products offer low yields, high fees, and little real-world utility.</li>
+<li>Many families lack accessible, long-term wealth-building tools that compound over a child’s lifetime.</li>
+<li>Cryptocurrency has so far been dominated by speculation; few projects deliver sustained, real-world value to ordinary families.</li>
+<br>
+<hr>
+<br>
+<h2>3. The Solution</h2>
+<br>
+<p>FTC turns a family’s early commitment into a durable, protocol-enforced wealth engine.</p>
+<br>
+<h3>For Parents</h3>
+<li>Open a vault for a child with a starting deposit.</li>
+<li>Optionally receive a protocol-matching bonus from the child-reserve allocation.</li>
+<li>Watch the balance grow from treasury yield and network fees.</li>
+<li>Withdrawals are automatically timed to life stages (ages 5, 10, 15, 20, 25).</li>
+<br>
+<h3>For Children</h3>
+<li>Receive structured support for food, housing, medical, education, and independence.</li>
+<li>No need to manage complex wallets until payout age; guardians hold control, then control transitions.</li>
+<br>
+<h3>For Merchants / FTC Stores</h3>
+<li>Accept FTC at checkout with near-zero-cost settlement.</li>
+<li>Receive treasury rebates for offering discounts to FTC families.</li>
+<li>Gain access to a loyal, mission-driven customer base.</li>
+<br>
+<hr>
+<br>
+<h2>4. Tokenomics at a Glance</h2>
+<br>
+<table><thead><tr><th>Parameter</th><th>Value</th></tr></thead><tbody>
+<tr><td>Total supply</td><td>21,000,000,000 FTC</td></tr>
+<tr><td>Treasury</td><td>20%</td></tr>
+<tr><td>Community rewards</td><td>25%</td></tr>
+<tr><td>Team + advisors</td><td>15% (4-year vesting, 1-year cliff)</td></tr>
+<tr><td>Investors</td><td>10% (3-year vesting, 1-year cliff)</td></tr>
+<tr><td>Public sale</td><td>15%</td></tr>
+<tr><td>Child savings reserve</td><td>10%</td></tr>
+<tr><td>Liquidity</td><td>5%</td></tr>
+<tr><td>Yield source</td><td>Treasury APY + protocol fee subsidy</td></tr>
+<tr><td>Payout schedule</td><td>Every 5 years, ages 5–25</td></tr>
+<tr><td>Deflationary mechanism</td><td>25% of merchant fees buyback-and-burn</td></tr>
+</tbody></table>
+<br>
+<p>Modeling across four scenarios (Conservative, Base, Abundance, Adverse) shows the protocol can sustain meaningful child balances and treasury growth over 30 years, provided adoption and merchant volume reach critical mass. See <code>models/scenario_summary_v1_2.csv</code>.</p>
+<br>
+<hr>
+<br>
+<h2>5. Technology</h2>
+<br>
+<li>**Blockchain:** EVM-compatible Layer 2 (Base, Arbitrum, or Optimism) for low fees and fast finality.</li>
+<li>**Smart contracts:** Solidity 0.8.x, OpenZeppelin libraries, UUPS upgrade proxy, multisig + timelock.</li>
+<li>**Oracles:** Chainlink for FTC/USD pricing; fallback TWAP.</li>
+<li>**Frontend:** Web app for deposits, child-account dashboards, merchant POS integration.</li>
+<li>**Tooling:** Foundry + Hardhat, dual-audit workflow, Forta monitoring, Immunefi bounty.</li>
+<br>
+<hr>
+<br>
+<h2>6. Roadmap Highlights</h2>
+<br>
+<li>**Month 1:** Finalize tokenomics, legal entity, securities-law memo.</li>
+<li>**Month 3:** Public testnet MVP with child vaults, treasury, and merchant discount demo.</li>
+<li>**Month 6:** Mainnet launch + first FTC Store pilot.</li>
+<li>**Month 12:** 50+ merchant network, governance DAO transition.</li>
+<li>**Year 2+:** Cross-chain expansion, protocol-owned stores, institutional partnerships.</li>
+<br>
+<hr>
+<br>
+<h2>7. Why FTC Can Succeed</h2>
+<br>
+<li>**Real utility first:** Families save and spend, not speculate.</li>
+<li>**Long time horizon:** Compound growth over 20+ years is structurally powerful.</li>
+<li>**Network effects:** More families → more merchants → more discounts → more adoption.</li>
+<li>**Transparent and auditable:** All core logic is on-chain and open-source.</li>
+<li>**Aligned incentives:** Parents, children, merchants, and the protocol all win when adoption grows.</li>
+<br>
+<hr>
+<br>
+<h2>8. What We Need Now</h2>
+<br>
+<p>Before finalizing the build plan, the following decisions from <code>docs/DECISION_LOG.md</code> are open:</p>
+<br>
+<li>Target L2 and legal jurisdiction.</li>
+<li>KYC model (lightweight vs. full identity verification).</li>
+<li>FTC Store strategy: partner merchants vs. owned stores.</li>
+<li>Initial raise amount and valuation expectations.</li>
+<li>Governance transition timeline.</li>
+<br>
+<hr>
+<br>
+<h2>9. Important Disclaimers</h2>
+<br>
+<li>FTC is **not** a bank, government program, or guaranteed investment product.</li>
+<li>Yield and discounts are **targets** based on protocol economics, not promises.</li>
+<li>Token value may fluctuate; child-account balances are exposed to market risk.</li>
+<li>All participants must comply with applicable laws in their jurisdiction.</li>
+<br>
+<hr>
+<br>
+<p>*For The Children. Built to last.*</p>
+<br></div>
+      </div>
+    </div>
+    
+    <div class="view" id="view-doc-risk">
+      <div class="view-header">
+        <h2>Risk Register</h2>
+        <p>Identified risks and mitigation strategies.</p>
+      </div>
+      <div class="card">
+        <div class="doc-content"><h1>FTC Risk Register</h1>
+<br>
+<p><strong>Version:</strong> 0.1</p>
+<p><strong>Last updated:</strong> 2026-07-17</p>
+<br>
+<hr>
+<br>
+<h2>1. Regulatory / Legal Risks</h2>
+<br>
+<table><thead><tr><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Mitigation</th></tr></thead><tbody>
+<tr><td>Token classified as a security by SEC / other regulator</td><td>Medium</td><td>Critical</td><td>No profit-sharing, no guaranteed yield, no central issuer promise of returns; utility-first design; obtain securities-law memo before sale; consider Reg D / non-U.S. restrictions.</td></tr>
+<tr><td>Money-transmitter / MSB licensing required for fiat on-ramps or store rebates</td><td>Medium</td><td>High</td><td>Use third-party licensed payment processors; no direct custody of user fiat; legal opinion before launch.</td></tr>
+<tr><td>KYC/AML failures or sanctions exposure</td><td>Medium</td><td>High</td><td>Partner with regulated KYC provider; tiered withdrawal limits; on-chain attestations; SAR/CTR policies if AML obligations arise.</td></tr>
+<tr><td>Consumer-protection actions (state AGs, FTC)</td><td>Medium</td><td>High</td><td>Clear disclosures: not a bank, not FDIC-insured, not a guaranteed investment; no deceptive marketing; legal review of all public materials.</td></tr>
+<tr><td>Cross-border regulatory mismatch (MiCA, UK, Asia)</td><td>Medium</td><td>Medium</td><td>Geo-block restricted jurisdictions initially; retain local counsel before expanding.</td></tr>
+</tbody></table>
+<br>
+<hr>
+<br>
+<h2>2. Technical / Smart-Contract Risks</h2>
+<br>
+<table><thead><tr><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Mitigation</th></tr></thead><tbody>
+<tr><td>Smart-contract exploit draining Treasury or child accounts</td><td>Low</td><td>Critical</td><td>Two independent audits; formal verification where feasible; bug bounty; timelock on admin functions; pause capability; Forta monitoring.</td></tr>
+<tr><td>Oracle manipulation / stale price</td><td>Medium</td><td>High</td><td>Chainlink primary + DEX TWAP fallback; staleness checks; circuit breakers on large price moves.</td></tr>
+<tr><td>Key compromise (multisig / deployer)</td><td>Low</td><td>Critical</td><td>3-of-5 multisig with hardware wallets; social recovery; no single key control; timelock on upgrades.</td></tr>
+<tr><td>Re-entrancy / integer bugs in payout logic</td><td>Medium</td><td>High</td><td>ReentrancyGuard; checked arithmetic; comprehensive fuzz tests; invariant testing with Foundry.</td></tr>
+<tr><td>Bridge risk if cross-chain later</td><td>Medium</td><td>High</td><td>Avoid bridging in MVP; if later, use canonical bridges and monitor for exploits.</td></tr>
+</tbody></table>
+<br>
+<hr>
+<br>
+<h2>3. Economic / Incentive Risks</h2>
+<br>
+<table><thead><tr><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Mitigation</th></tr></thead><tbody>
+<tr><td>Yield unsustainable if treasury underperforms</td><td>Medium</td><td>High</td><td>Yield is a protocol parameter, not a debt; cap maximum yield; conservative treasury allocation; transparent reporting; rate adjustments by governance.</td></tr>
+<tr><td>Store discount unsustainable without volume</td><td>High</td><td>High</td><td>Start with partner-negotiated discounts / cashback, not protocol-funded 50% subsidies; scale discounts only as fee revenue scales; model in tokenomics sim.</td></tr>
+<tr><td>Token price collapse eroding child-account value</td><td>Medium</td><td>High</td><td>Diversify treasury into stables; long-term holding incentives; avoid pump-driven launches; focus on utility adoption.</td></tr>
+<tr><td>Low adoption → insufficient network effects</td><td>Medium</td><td>High</td><td>Partner with parent communities, schools, churches; build simple UX; onboarding subsidies limited to child reserve.</td></tr>
+<tr><td>Run-on-payouts draining Treasury</td><td>Low</td><td>Critical</td><td>Payouts are age-gated and capped per checkpoint; reserve ratio monitored; emergency pause.</td></tr>
+</tbody></table>
+<br>
+<hr>
+<br>
+<h2>4. Operational / Reputational Risks</h2>
+<br>
+<table><thead><tr><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Mitigation</th></tr></thead><tbody>
+<tr><td>Fraudulent child accounts / duplicate registrations</td><td>Medium</td><td>Medium</td><td>Identity/KYC attestation; per-child uniqueness via identity hash; anti-gaming checks.</td></tr>
+<tr><td>Negative press / “ponzi” accusations</td><td>Medium</td><td>High</td><td>Clear, honest messaging; audited code; public treasury dashboards; no income promises.</td></tr>
+<tr><td>Team / founder disputes</td><td>Medium</td><td>Medium</td><td>Legal entity; vesting contracts; multisig governance; written roles and responsibilities.</td></tr>
+<tr><td>Dependence on a single chain / L2 outage</td><td>Low</td><td>Medium</td><td>Choose proven L2; keep emergency migration plan; monitor sequencer health.</td></tr>
+</tbody></table>
+<br>
+<hr>
+<br>
+<h2>5. Immediate Action Items</h2>
+<br>
+<li>**Before any token sale:** written securities-law opinion.</li>
+<li>**Before testnet:** complete internal audit and remediation.</li>
+<li>**Before mainnet:** two independent external audits + bug bounty.</li>
+<li>**Before store launch:** economic model showing discount sustainability for 5+ years.</li>
+<li>**Ongoing:** monthly risk-review call with counsel and core team.</li>
+<br></div>
+      </div>
+    </div>
+    
+    <div class="view" id="view-doc-roadmap">
+      <div class="view-header">
+        <h2>Testnet MVP Roadmap</h2>
+        <p>Deployment plan for Base Sepolia.</p>
+      </div>
+      <div class="card">
+        <div class="doc-content"><h1>FTC Testnet MVP Roadmap</h1>
+<br>
+<p><strong>Version:</strong> 0.2</p>
+<p><strong>Updated:</strong> 2026-07-17</p>
+<p><strong>Target Network:</strong> Base Sepolia (testnet) → Base (mainnet)</p>
+<p><strong>Tooling:</strong> Foundry (primary) + Hardhat (deployment scripts), OpenZeppelin v5.1, py-solc-x for compilation</p>
+<br>
+<hr>
+<br>
+<h2>Resolved Decisions</h2>
+<br>
+<p>All 6 open decisions from the prior session are now resolved (see <code>docs/DECISIONS.md</code>):</p>
+<li>**L2:** Base</li>
+<li>**Legal:** Delaware C-Corp + Wyoming DAO LLC + Swiss foundation (pending counsel)</li>
+<li>**KYC:** Lightweight — guardian ID at creation, full KYC at $5,000+ cumulative withdrawals</li>
+<li>**Stores:** Partner-merchant network first, no owned stores</li>
+<li>**Raise:** $8–15M public sale, $60–80M target initial market cap</li>
+<li>**Deposit:** $250 base, 1:1 treasury match for qualifying low-income families (up to $500 effective)</li>
+<br>
+<hr>
+<br>
+<h2>Contracts Delivered</h2>
+<br>
+<table><thead><tr><th>Contract</th><th>File</th><th>Status</th></tr></thead><tbody>
+<tr><td>FTC.sol</td><td>`src/FTC.sol`</td><td>ERC-20, 21B fixed supply, genesis allocation, burn role, pausable</td></tr>
+<tr><td>GuardianRegistry.sol</td><td>`src/GuardianRegistry.sol`</td><td>Guardian/child registration, age + KYC attestation, withdrawal tracking</td></tr>
+<tr><td>ChildSavingsVault.sol</td><td>`src/ChildSavingsVault.sol`</td><td>Age-gated 5-year payouts, 25% max per checkpoint, yield accrual, deposit matching</td></tr>
+</tbody></table>
+<br>
+<h3>Not Yet Implemented (Phase 1+)</h3>
+<li>Treasury.sol — yield strategies, store subsidies, buyback-and-burn</li>
+<li>FeeDispatcher.sol — merchant fee splitting (25% burn / 35% yield / 30% stores / 10% liquidity)</li>
+<li>StoreDiscount.sol — merchant registry and discount logic</li>
+<br>
+<hr>
+<br>
+<h2>Testnet Deployment Plan</h2>
+<br>
+<h3>Step 1: Local Compilation &amp; Tests (Week 5)</h3>
+<li>Compile all contracts with solc 0.8.24 (via Foundry or py-solc-x)</li>
+<li>Write unit tests:</li>
+<p>   - FTC: genesis allocation, burn, pause, transfer</p>
+<p>   - GuardianRegistry: registration, attestation, KYC threshold</p>
+<p>   - ChildSavingsVault: deposit, yield accrual, age-gated payout, match</p>
+<li>Run fuzz tests on payout eligibility and max-payout boundary</li>
+<br>
+<h3>Step 2: Base Sepolia Deployment (Week 6)</h3>
+<li>Deploy FTC.sol with test allocation addresses</li>
+<li>Deploy GuardianRegistry.sol (set KYC threshold = 5000 FTC)</li>
+<li>Deploy ChildSavingsVault.sol (set yield rate = 1100 bps, match cap = 250 FTC)</li>
+<li>Grant roles:</li>
+<p>   - YIELD_SETTER_ROLE → Treasury multisig</p>
+<p>   - KYC_ISSUER_ROLE → designated attestation service</p>
+<p>   - AGE_ATTESTOR_ROLE → designated age verification service</p>
+<li>Verify contracts on Basescan</li>
+<br>
+<h3>Step 3: Integration Testing (Weeks 7–8)</h3>
+<li>End-to-end flow: register guardian → register child → attest age → create vault → deposit → accrue yield → payout at checkpoint</li>
+<li>Gas profiling for all core operations</li>
+<li>Edge cases:</li>
+<p>   - Payout before age 5 (should revert)</p>
+<p>   - Double payout at same checkpoint (should revert)</p>
+<p>   - Payout &gt; 25% of balance (should revert)</p>
+<p>   - KYC triggered at $5,000 cumulative (should revert without attestation)</p>
+<p>   - Deposit match for qualifying family (1:1 up to cap)</p>
+<p>   - Pause/unpause flows</p>
+<br>
+<h3>Step 4: Demo dApp (Weeks 9–10)</h3>
+<li>Simple web interface:</li>
+<p>   - Guardian registration + child registration</p>
+<p>   - Deposit FTC, view child balance</p>
+<p>   - Simulate time progression to see payout eligibility</p>
+<li>Deploy on Base Sepolia with test FTC tokens</li>
+<br>
+<h3>Step 5: Beta Campaign (Weeks 10–12)</h3>
+<li>Onboard 500–1,000 simulated child accounts on testnet</li>
+<li>Test with real guardian wallets (volunteer families)</li>
+<li>Collect analytics: gas costs, deposit patterns, payout timing</li>
+<br>
+<hr>
+<br>
+<h2>Audit Gates</h2>
+<br>
+<li>**Before testnet:** Internal security review (ReentrancyGuard, AccessControl, Pausable on all contracts)</li>
+<li>**Before mainnet:** Two independent audit firms (OpenZeppelin / Trail of Bits / Spearbit)</li>
+<li>**Continuous:** Immunefi bug bounty post-mainnet</li>
+<br>
+<hr>
+<br>
+<h2>Role Assignments at Launch</h2>
+<br>
+<table><thead><tr><th>Role</th><th>Holder</th><th>Purpose</th></tr></thead><tbody>
+<tr><td>DEFAULT_ADMIN_ROLE</td><td>Treasury multisig (Gnosis Safe)</td><td>Top-level governance</td></tr>
+<tr><td>BURNER_ROLE (FTC)</td><td>Treasury / FeeDispatcher</td><td>Burn 25% of merchant fees</td></tr>
+<tr><td>PAUSER_ROLE</td><td>Treasury multisig</td><td>Emergency pause</td></tr>
+<tr><td>KYC_ISSUER_ROLE (GuardianRegistry)</td><td>Designated KYC partner</td><td>Guardian identity + child KYC attestation</td></tr>
+<tr><td>AGE_ATTESTOR_ROLE (GuardianRegistry)</td><td>Designated age verifier</td><td>Confirm child birth timestamp</td></tr>
+<tr><td>YIELD_SETTER_ROLE (ChildSavingsVault)</td><td>Treasury multisig</td><td>Set floating yield rate</td></tr>
+<tr><td>MATCH_OPERATOR_ROLE (ChildSavingsVault)</td><td>Treasury multisig</td><td>Set match cap for low-income families</td></tr>
+</tbody></table>
+<br>
+<hr>
+<br>
+<h2>Key Parameters at Launch</h2>
+<br>
+<table><thead><tr><th>Parameter</th><th>Initial Value</th><th>Adjustable by</th></tr></thead><tbody>
+<tr><td>Yield rate</td><td>1100 bps (11%)</td><td>YIELD_SETTER_ROLE</td></tr>
+<tr><td>KYC threshold</td><td>5,000 FTC (~$5,000)</td><td>Governance</td></tr>
+<tr><td>Match cap per child</td><td>250 FTC (~$250)</td><td>MATCH_OPERATOR_ROLE</td></tr>
+<tr><td>Max payout per checkpoint</td><td>2500 bps (25%)</td><td>Immutable (constant)</td></tr>
+<tr><td>Payout ages</td><td>5, 10, 15, 20, 25</td><td>Immutable (constant)</td></tr>
+</tbody></table>
+<br>
+<hr>
+<br>
+<h2>Next Steps</h2>
+<br>
+<li>✅ Decisions documented → `docs/DECISIONS.md`</li>
+<li>✅ Core contracts written → `src/FTC.sol`, `src/GuardianRegistry.sol`, `src/ChildSavingsVault.sol`</li>
+<li>✅ Contracts compile (pending verification)</li>
+<li>⬜ Write unit tests</li>
+<li>⬜ Deploy to Base Sepolia</li>
+<li>⬜ Build demo dApp</li>
+<li>⬜ Engage securities counsel for token classification memo</li>
+<li>⬜ Implement Treasury.sol, FeeDispatcher.sol, StoreDiscount.sol (Phase 1+)</li></div>
+      </div>
+    </div>
+    
+    <div class="view" id="view-doc-legal">
+      <div class="view-header">
+        <h2>Legal Considerations</h2>
+        <p>Securities, MSB, KYC/AML, entity structure.</p>
+      </div>
+      <div class="card">
+        <div class="doc-content"><h1>FTC Legal Considerations Memo</h1>
+<br>
+<p><strong>Version:</strong> 0.1</p>
+<p><strong>Date:</strong> 2026-07-17</p>
+<p><strong>Prepared by:</strong> Kai (not legal counsel — this memo flags issues for attorney review)</p>
+<br>
+<hr>
+<br>
+<h2>1. Overview</h2>
+<br>
+<p>FTC is a decentralized protocol with a token, child savings vaults, merchant discounts, and a treasury. This creates overlapping legal questions in securities, commodities, money-transmission, tax, and consumer-protection law. This document identifies the major issues and suggests how to engage counsel.</p>
+<br>
+<hr>
+<br>
+<h2>2. Securities Law (U.S.)</h2>
+<br>
+<h3>2.1 Primary Question</h3>
+<p>Will FTC be deemed an “investment contract” under the Howey test?</p>
+<br>
+<p><strong>Howey elements:</strong></p>
+<li>Investment of money.</li>
+<li>In a common enterprise.</li>
+<li>With expectation of profits.</li>
+<li>Derived from the efforts of others.</li>
+<br>
+<h3>2.2 Risk Factors</h3>
+<li>If users buy FTC expecting price appreciation driven by the team/protocol, the token may satisfy Howey.</li>
+<li>Guaranteed or marketed yield strengthens the “expectation of profits” prong.</li>
+<li>Marketing that emphasizes wealth, abundance, or returns increases risk.</li>
+<br>
+<h3>2.3 Mitigation</h3>
+<li>**No guaranteed yield.** Yield is a protocol parameter based on treasury performance and fees, not a debt obligation.</li>
+<li>**Utility emphasis.** FTC is required to access discounts, open vaults, and pay at stores.</li>
+<li>**Decentralization.** Over time, migrate control from the team to a DAO.</li>
+<li>**Disclosures.** Every vault opening and public communication includes: “FTC is not a security, bank deposit, or guaranteed investment.”</li>
+<li>**Pre-launch legal opinion.** Retain U.S. securities counsel to issue a classification memo.</li>
+<br>
+<hr>
+<br>
+<h2>3. Money Transmission / MSB</h2>
+<br>
+<h3>3.1 Primary Question</h3>
+<p>Does operating Treasury, merchant rebates, or fiat on-ramps require state or federal MSB registration?</p>
+<br>
+<h3>3.2 Risk Factors</h3>
+<li>Accepting and transmitting value on behalf of users is a regulated activity in many jurisdictions.</li>
+<li>Direct fiat custody or conversion would likely trigger FinCEN MSB rules in the U.S.</li>
+<br>
+<h3>3.3 Mitigation</h3>
+<li>Use licensed third-party payment processors for fiat on/off-ramps.</li>
+<li>Treasury holds crypto assets only; stablecoin operations through whitelisted ERC-4626 vaults.</li>
+<li>Merchants receive rebates in FTC directly from smart contracts, not from a centralized transmitter.</li>
+<li>Obtain legal memo before enabling any fiat functionality.</li>
+<br>
+<hr>
+<br>
+<h2>4. Consumer Protection</h2>
+<br>
+<h3>4.1 FTC / State AG Risk</h3>
+<li>Marketing claims like “end generational poverty” or “guaranteed abundance” could draw scrutiny.</li>
+<li>Any representation of future returns must be truthful, substantiated, and not misleading.</li>
+<br>
+<h3>4.2 Mitigation</h3>
+<li>Use aspirational framing for the mission and factual framing for mechanics.</li>
+<li>Disclose risks prominently: token volatility, yield variability, no FDIC insurance, no government backing.</li>
+<li>Avoid income projections in marketing materials.</li>
+<br>
+<hr>
+<br>
+<h2>5. Tax</h2>
+<br>
+<h3>5.1 U.S. Tax Considerations</h3>
+<li>Token sales may trigger ordinary income or capital gains depending on structure.</li>
+<li>Parent deposits into child vaults may be treated as gifts; consult tax advisor.</li>
+<li>Merchant discounts / rebates may create taxable income or 1099 reporting obligations.</li>
+<br>
+<h3>5.2 Mitigation</h3>
+<li>Engage crypto tax counsel early.</li>
+<li>Provide users with transaction history exports for their own tax reporting.</li>
+<br>
+<hr>
+<br>
+<h2>6. KYC / AML / Sanctions</h2>
+<br>
+<h3>6.1 Requirements</h3>
+<li>Even if the protocol is permissionless, interacting with U.S.-linked entities or fiat rails creates AML obligations.</li>
+<li>Large withdrawals, merchant onboarding, and investor sales should include sanctions screening.</li>
+<br>
+<h3>6.2 Recommended Approach</h3>
+<li>Tiered KYC:</li>
+<p>  - Deposits below $500/year: no verification.</p>
+<p>  - Withdrawals above $1,000/year: KYC attestation.</p>
+<p>  - Merchant rebates above threshold: full KYC + OFAC screening.</p>
+<li>Use a regulated identity provider or privacy-preserving attestation (e.g., ZK passport).</li>
+<br>
+<hr>
+<br>
+<h2>7. International</h2>
+<br>
+<li>**EU MiCA:** Asset-referenced tokens and e-money tokens have strict rules. Utility tokens are less regulated but still require whitepaper and issuer registration.</li>
+<li>**UK:** FCA registration may be required for cryptoasset businesses.</li>
+<li>**Other jurisdictions:** Vary widely; geo-block high-risk countries and obtain local counsel before expansion.</li>
+<br>
+<hr>
+<br>
+<h2>8. Entity Structure Recommendation (Preliminary)</h2>
+<br>
+<li>**U.S. operating entity:** Wyoming DAO LLC or Delaware C-Corp for protocol development and grants.</li>
+<li>**Foundation / Association (Cayman / Swiss / Singapore):** Non-profit vehicle for treasury and ecosystem grants, if non-U.S. structure is desired.</li>
+<li>**Multisig + Timelock:** Legal entity should not have unilateral control over user funds.</li>
+<br>
+<p><strong>Final structure requires counsel.</strong></p>
+<br>
+<hr>
+<br>
+<h2>9. Action Items</h2>
+<br>
+<table><thead><tr><th>#</th><th>Task</th><th>Priority</th></tr></thead><tbody>
+<tr><td>1</td><td>Retain U.S. securities counsel for token-classification memo</td><td>Critical</td></tr>
+<tr><td>2</td><td>Retain tax counsel for entity and token-sale structuring</td><td>Critical</td></tr>
+<tr><td>3</td><td>Select KYC/AML provider or privacy-preserving attestation vendor</td><td>High</td></tr>
+<tr><td>4</td><td>Draft Terms of Use, Privacy Policy, Risk Disclosures</td><td>High</td></tr>
+<tr><td>5</td><td>Geo-block restricted jurisdictions at launch</td><td>High</td></tr>
+<tr><td>6</td><td>File entity formation documents</td><td>High</td></tr>
+<tr><td>7</td><td>Ongoing compliance monitoring</td><td>Medium</td></tr>
+</tbody></table>
+<br>
+<hr>
+<br>
+<h2>10. Disclaimer</h2>
+<br>
+<p>This memo is for internal planning only. It does <strong>not</strong> constitute legal advice. All legal conclusions must be confirmed by qualified counsel in the relevant jurisdictions.</p>
+<br></div>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+<script>
+// ─── Navigation ───
+const navItems = document.querySelectorAll('.nav-item');
+const views = document.querySelectorAll('.view');
+navItems.forEach(item => {
+  item.addEventListener('click', () => {
+    const target = item.dataset.view;
+    navItems.forEach(n => n.classList.remove('active'));
+    item.classList.add('active');
+    views.forEach(v => v.classList.remove('active'));
+    const el = document.getElementById('view-' + target);
+    if (el) el.classList.add('active');
+    window.scrollTo(0, 0);
+  });
+});
+
+// ─── ABI Tabs ───
+const abiTabs = document.querySelectorAll('.tab[data-abi]');
+const abiPanels = document.querySelectorAll('.abi-panel');
+abiTabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    abiTabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    abiPanels.forEach(p => p.style.display = 'none');
+    const panel = document.getElementById('abi-' + tab.dataset.abi);
+    if (panel) panel.style.display = 'block';
+  });
+});
+
+// ─── Particle System ───
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let W, H;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+class Particle {
+  constructor() {
+    this.x = Math.random() * W;
+    this.y = Math.random() * H;
+    this.vx = (Math.random() - 0.5) * 0.3;
+    this.vy = (Math.random() - 0.5) * 0.3;
+    this.size = Math.random() * 2 + 0.5;
+    this.opacity = Math.random() * 0.4 + 0.1;
+    const colors = ['79,158,255', '0,212,170', '180,107,255'];
+    this.color = colors[Math.floor(Math.random() * colors.length)];
+  }
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+    if (this.x < 0 || this.x > W) this.vx *= -1;
+    if (this.y < 0 || this.y > H) this.vy *= -1;
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${this.color},${this.opacity})`;
+    ctx.fill();
+  }
+}
+
+const particleCount = Math.min(80, Math.floor(W * H / 15000));
+for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+
+function drawConnections() {
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 140) {
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.strokeStyle = `rgba(79,158,255,${0.08 * (1 - dist / 140)})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+}
+
+function animate() {
+  ctx.clearRect(0, 0, W, H);
+  particles.forEach(p => { p.update(); p.draw(); });
+  drawConnections();
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+</body>
+</html>

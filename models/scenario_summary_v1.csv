@@ -1,0 +1,5 @@
+scenario,final_children_M,final_child_balance_$B,final_price_$,final_market_cap_$B,final_treasury_$B,total_burned_B
+Conservative,0.0,42.55,0.0255,0.2,0.11,0.0
+Base Case,0.0,140.47,0.0255,0.2,0.11,0.0
+Abundance,0.0,780.11,0.0256,0.2,0.11,0.0
+Adverse,0.0,9.06,0.0255,0.2,0.11,0.0

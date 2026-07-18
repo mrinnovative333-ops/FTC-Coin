@@ -1,0 +1,7 @@
+timestamp,pair,action,price,lots,pnl,balance,reason,signal_json
+2023-02-10,EURUSD,PLACE_OCO,1.0742292404174805,5156.91,0,0,,"{'type': 'oco_straddle', 'timestamp': Timestamp('2023-02-10 00:00:00'), 'event_time': Timestamp('2023-02-10 10:30:00'), 'current_price': np.float64(1.0742292404174805), 'atr': np.float64(0.009695725781577005), 'buy_stop': np.float64(1.079077103308269), 'sell_stop': np.float64(1.069381377526692), 'buy_sl': np.float64(1.0693813775266918), 'buy_tp': np.float64(1.0984685548714228), 'sell_sl': np.float64(1.0790771033082691), 'sell_tp': np.float64(1.0499899259635381), 'risk_pct': 1.0, 'minutes_until_event': 630.0}"
+2023-02-13,EURUSD,FILL_SELL,1.069381377526692,0,0,0,,
+2023-02-13,EURUSD,CANCEL_OCO,1.0677714347839355,0,0,0,expired,
+2023-03-10,EURUSD,PLACE_OCO,1.0584698915481567,5848.09,0,0,,"{'type': 'oco_straddle', 'timestamp': Timestamp('2023-03-10 00:00:00'), 'event_time': Timestamp('2023-03-10 10:30:00'), 'current_price': np.float64(1.0584698915481567), 'atr': np.float64(0.008549800940922376), 'buy_stop': np.float64(1.062744792018618), 'sell_stop': np.float64(1.0541949910776955), 'buy_sl': np.float64(1.0541949910776955), 'buy_tp': np.float64(1.0798443939004627), 'sell_sl': np.float64(1.062744792018618), 'sell_tp': np.float64(1.0370953891958508), 'risk_pct': 1.0, 'minutes_until_event': 630.0}"
+2023-03-13,EURUSD,FILL_BUY,1.062744792018618,0,0,0,,
+2023-03-13,EURUSD,CANCEL_OCO,1.0683646202087402,0,0,0,expired,

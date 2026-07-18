@@ -1,0 +1,63 @@
+# Bot configuration
+# Copy this file to config.yaml and edit
+
+mode: paper  # paper, backtest, live
+
+account:
+  starting_balance: 50000
+  currency: USD
+  max_daily_risk_pct: 2.0
+  max_total_drawdown_pct: 6.0
+
+risk:
+  risk_per_trade_pct: 1.0
+  max_spread_pips: 20
+  min_atr_pips: 8
+  atr_period: 14
+
+strategy:
+  name: news_oco_straddle
+  pairs:
+    - EURUSD
+    - GBPUSD
+    - USDJPY
+    - XAUUSD
+  timeframes:
+    - M15
+    - H1
+  entry_distance_atr_multiplier: 0.5  # buy/sell stops placed at ATR * 0.5 from price
+  trailing_stop_atr_multiplier: 1.0
+  trailing_step_atr_multiplier: 0.3
+  take_profit_atr_multiplier: 2.0
+  expire_minutes_after_event: 30  # cancel unfilled orders after event
+  news_filter:
+    - NFP
+    - CPI
+    - FOMC
+    - ECB
+    - Unemployment Rate
+    - Non-Farm Payrolls
+    - Core CPI
+
+calendar:
+  source: manual  # options: manual, forex_factory_ical, investing_com_api
+  ical_url: ""
+  api_key: ""
+  timezone: America/New_York
+
+broker:
+  name: paper
+  # For OANDA:
+  # name: oanda
+  # api_key: ""
+  # account_id: ""
+  # environment: practice  # practice or live
+
+logging:
+  level: INFO
+  file: logs/bot.log
+
+notifications:
+  telegram_bot_token: ""
+  telegram_chat_id: ""
+  enabled: false

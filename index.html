@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FTC — For The Children | Join the Waitlist</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+:root{--bg:#060815;--surface:#0d1120;--accent:#4f9eff;--accent2:#00d4aa;--text:#e8ecf5;--text2:#7a85a3;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:40px 20px;background:radial-gradient(ellipse at 50% 0%,rgba(79,158,255,0.15),transparent 60%),radial-gradient(ellipse at 80% 100%,rgba(0,212,170,0.1),transparent 50%)}
+.badge{display:inline-block;padding:8px 16px;border:1px solid rgba(79,158,255,0.25);border-radius:999px;font-size:12px;text-transform:uppercase;letter-spacing:2px;color:var(--accent);margin-bottom:24px;background:rgba(79,158,255,0.08)}
+h1{font-size:clamp(36px,8vw,72px);font-weight:900;line-height:1.05;margin-bottom:20px;letter-spacing:-2px}
+.gradient{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+p.subtitle{font-size:clamp(16px,3vw,22px);color:var(--text2);max-width:680px;margin-bottom:36px}
+.cta{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.btn-primary{padding:18px 32px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:700;font-size:16px;text-decoration:none;box-shadow:0 8px 30px rgba(79,158,255,0.3);transition:transform 0.2s}
+.btn-primary:hover{transform:translateY(-2px)}
+.btn-secondary{padding:18px 32px;border-radius:12px;border:1px solid rgba(79,158,255,0.3);color:var(--text);font-weight:600;font-size:16px;text-decoration:none;background:rgba(13,17,32,0.6)}
+.stats{display:flex;gap:40px;justify-content:center;margin-top:60px;flex-wrap:wrap}
+.stat{text-align:center}
+.stat .num{font-size:36px;font-weight:900;color:var(--accent2)}
+.stat .label{font-size:13px;color:var(--text2);text-transform:uppercase;letter-spacing:1px}
+.section{padding:80px 20px;max-width:1000px;margin:0 auto}
+.section h2{font-size:32px;font-weight:800;margin-bottom:20px}
+.section p{color:var(--text2);margin-bottom:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-top:40px}
+.card{background:var(--surface);border:1px solid rgba(79,158,255,0.12);border-radius:16px;padding:24px}
+.card h3{font-size:20px;margin-bottom:10px;color:var(--accent)}
+.card p{font-size:14px;color:var(--text2)}
+.waitlist{background:linear-gradient(135deg,rgba(79,158,255,0.1),rgba(0,212,170,0.08));border-radius:24px;padding:60px 40px;text-align:center;border:1px solid rgba(79,158,255,0.15);margin:40px 20px}
+.waitlist h2{font-size:28px;font-weight:800;margin-bottom:12px}
+.waitlist p{color:var(--text2);margin-bottom:24px}
+form{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+input[type="email"]{padding:16px 20px;border-radius:12px;border:1px solid rgba(79,158,255,0.25);background:#060815;color:#fff;min-width:280px;font-size:16px}
+input[type="submit"]{padding:16px 28px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;font-weight:700;font-size:16px;cursor:pointer}
+.footer{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px}
+.footer a{color:var(--accent);text-decoration:none}
+@media(max-width:600px){.stats{gap:20px}.stat .num{font-size:28px}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge">Protocol Launch Waitlist</div>
+  <h1>FTC — <span class="gradient">For The Children</span></h1>
+  <p class="subtitle">A decentralized savings protocol on Base. Parents save early. Children unlock wealth at 5, 10, 15, 20, and 25.</p>
+  <div class="cta">
+    <a href="#waitlist" class="btn-primary">Join the Waitlist</a>
+    <a href="dashboard.html" class="btn-secondary">View Dashboard</a>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="num">21B</div><div class="label">Fixed Supply</div></div>
+    <div class="stat"><div class="num">25Y</div><div class="label">Wealth Horizon</div></div>
+    <div class="stat"><div class="num">50%</div><div class="label">Max Discount</div></div>
+    <div class="stat"><div class="num">$500</div><div class="label">Low-Income Start</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Why FTC is different</h2>
+  <p>Most crypto projects chase fast money. FTC chases long-term family abundance.</p>
+  <div class="grid">
+    <div class="card"><h3>🧒 Age-Gated Vaults</h3><p>Child accounts lock tokens until ages 5, 10, 15, 20, and 25. No rug pulls. No panic selling.</p></div>
+    <div class="card"><h3>💰 1:1 Treasury Match</h3><p>Qualifying low-income families deposit $250 and start with $500. The protocol meets them halfway.</p></div>
+    <div class="card"><h3>🏪 Real Store Discounts</h3><p>Partner merchants accept FTC and offer 10–30% off essentials. Funded by protocol fees, not charity.</p></div>
+    <div class="card"><h3>🔥 Deflationary Fees</h3><p>25% of every merchant fee is burned forever. 35% funds child yield. Adoption strengthens the system.</p></div>
+  </div>
+</div>
+
+<div id="waitlist" class="waitlist">
+  <h2>Be a Founding Parent</h2>
+  <p>Join the waitlist. Get early access, referral rewards, and updates before the public sale.</p>
+  <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+    <input type="email" name="email" placeholder="Enter your email" required>
+    <input type="submit" value="Join Waitlist">
+  </form>
+  <p style="font-size:12px;color:#4a5478;margin-top:16px">Replace YOUR_FORM_ID with your Formspree form ID, or connect to your own email backend.</p>
+</div>
+
+<div class="footer">
+  <p>Built on Base. Open-source. Community-first.</p>
+  <p><a href="https://github.com/mrinnovative333-ops/FTC-Coin">GitHub</a> · <a href="dashboard.html">Dashboard</a></p>
+</div>
+
+</body>
+</html>

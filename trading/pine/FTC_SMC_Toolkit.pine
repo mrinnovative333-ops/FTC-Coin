@@ -1,0 +1,73 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © MrInnovative333
+
+//@version=5
+indicator("FTC Smart Money Toolkit", shorttitle="FTC SMC", overlay=true, max_lines_count=500, max_boxes_count=500)
+
+// ───────────────────── Inputs ─────────────────────
+groupFVG = "Fair Value Gaps"
+groupOB = "Order Blocks"
+groupSessions = "Sessions"
+groupStyle = "Style"
+
+showFVG = input.bool(true, "Show Fair Value Gaps", group=groupFVG)
+fvgThreshold = input.float(0.0, "Min FVG Size (pips)", group=groupFVG)
+showBullFVG = input.bool(true, "Bullish FVG", group=groupFVG)
+showBearFVG = input.bool(true, "Bearish FVG", group=groupFVG)
+fvgLookback = input.int(50, "FVG Lookback", group=groupFVG)
+
+showOB = input.bool(true, "Show Order Blocks", group=groupOB)
+obLookback = input.int(20, "OB Lookback", group=groupOB)
+obMitigation = input.bool(true, "Show Mitigated OBs", group=groupOB)
+
+showSessions = input.bool(true, "Show Sessions", group=groupSessions)
+showKillzone = input.bool(true, "Highlight Killzones", group=groupSessions)
+
+bullColor = input.color(color.new(color.green, 70), "Bullish Color", group=groupStyle)
+bearColor = input.color(color.new(color.red, 70), "Bearish Color", group=groupStyle)
+obBullColor = input.color(color.new(color.blue, 60), "Bull OB Color", group=groupStyle)
+obBearColor = input.color(color.new(color.orange, 60), "Bear OB Color", group=groupStyle)
+
+// ───────────────────── Fair Value Gaps ─────────────────────
+fvgBull = low > high[2]
+fvgBear = high < low[2]
+
+var box[] bullFVGs = array.new_box(0)
+var box[] bearFVGs = array.new_box(0)
+
+if showFVG and showBullFVG and fvgBull
+    box.new(bar_index[1], high[2], bar_index, low, border_color=bullColor, bgcolor=bullColor)
+    array.push(bullFVGs, box.new(bar_index[1], high[2], bar_index, low, border_color=bullColor, bgcolor=bullColor))
+
+if showFVG and showBearFVG and fvgBear
+    array.push(bearFVGs, box.new(bar_index[1], low[2], bar_index, high, border_color=bearColor, bgcolor=bearColor))
+
+// ───────────────────── Order Blocks (Simplified) ─────────────────────
+// Bullish OB: last down candle before a strong up move
+// Bearish OB: last up candle before a strong down move
+
+bullOB = close[1] < open[1] and close > high[1]
+bearOB = close[1] > open[1] and close < low[1]
+
+var box[] bullOBs = array.new_box(0)
+var box[] bearOBs = array.new_box(0)
+
+if showOB and bullOB
+    array.push(bullOBs, box.new(bar_index[1], high[1], bar_index, low[1], border_color=obBullColor, bgcolor=obBullColor))
+
+if showOB and bearOB
+    array.push(bearOBs, box.new(bar_index[1], high[1], bar_index, low[1], border_color=obBearColor, bgcolor=obBearColor))
+
+// ───────────────────── Sessions / Killzones ─────────────────────
+t = time(timeframe.period, "HHmmss")
+hourMinute = hour * 100 + minute
+
+isLondon = (hourMinute >= 300 and hourMinute <= 530)
+isNY = (hourMinute >= 830 and hourMinute <= 1130)
+isKillzone = isLondon or isNY
+
+bgcolor(showSessions and isKillzone ? color.new(color.yellow, 90) : na, title="Killzone Highlight")
+
+// ───────────────────── Alerts ─────────────────────
+alertcondition(fvgBull, "Bullish FVG", "New bullish fair value gap")
+alertcondition(fvgBear, "Bearish FVG", "New bearish fair value gap")

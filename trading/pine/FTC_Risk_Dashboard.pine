@@ -1,0 +1,30 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © MrInnovative333
+
+//@version=5
+indicator("FTC Prop Firm Dashboard", shorttitle="FTC Risk", overlay=false)
+
+// ───────────────────── Inputs ─────────────────────
+accountSize = input.float(10000.0, "Account Size ($)", group="Risk")
+riskPercent = input.float(1.0, "Risk Per Trade (%)", group="Risk")
+stopLossPips = input.float(20.0, "Stop Loss (pips)", group="Risk")
+pipValuePerLot = input.float(10.0, "Pip Value Per Lot ($)", group="Risk")
+tradeDirection = input.string("Long", "Direction", options=["Long", "Short"], group="Trade")
+entryPrice = input.float(1.0800, "Entry Price", group="Trade")
+
+// ───────────────────── Calculations ─────────────────────
+riskAmount = accountSize * (riskPercent / 100)
+lotSize = riskAmount / (stopLossPips * pipValuePerLot)
+
+// ───────────────────── Display ─────────────────────
+tableRisk = table.new(position.top_right, 1, 6, bgcolor=color.black, border_width=1)
+table.cell(tableRisk, 0, 0, "FTC Risk Dashboard", text_color=color.white, text_size=size.normal)
+table.cell(tableRisk, 0, 1, "Risk Amount: $" + str.tostring(riskAmount, "#.#"), text_color=color.yellow)
+table.cell(tableRisk, 0, 2, "Max Lot Size: " + str.tostring(lotSize, "#.###"), text_color=color.aqua)
+table.cell(tableRisk, 0, 3, "SL Distance: " + str.tostring(stopLossPips) + " pips", text_color=color.red)
+table.cell(tableRisk, 0, 4, "Account: $" + str.tostring(accountSize, "#.#"), text_color=color.white)
+table.cell(tableRisk, 0, 5, "Risk %: " + str.tostring(riskPercent) + "%", text_color=color.white)
+
+// Daily loss limit line
+maxDailyLoss = accountSize * 0.05
+hline(0, "Zero", color.gray)
